@@ -15,7 +15,6 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
@@ -26,7 +25,6 @@ SECRET_KEY = 'django-insecure-z8*((s3*gw8uyi6299_8zioy*8ux6q@fy14@a8iluk3!%3xnw(
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
-
 
 # Application definition
 
@@ -69,17 +67,30 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'luffycityapi.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
 DATABASES = {
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': BASE_DIR / 'db.sqlite3',
+    # }
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'dj_db_conn_pool.backends.mysql',
+        'NAME': 'luffycity',
+        'PORT': 3306,
+        'HOST': '127.0.0.1',
+        'USER': 'luffycity',
+        'PASSWORD': 'luffycity',
+        'OPTIONS': {
+            'charset': 'utf8mb4',
+        },
+        'POOL_OPTIONS': {  # 连接池选项配置
+            'POOL_SIZE': 10,  # 连接池默认创建的链接对象的数量
+            'MAX_OVERFLOW': 10  # 连接池默认创建的链接对象的最大数量
+        }
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -99,7 +110,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
@@ -113,7 +123,6 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
@@ -126,10 +135,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # 日志
 LOGGING = {
-    'version': 1, # 使用的日志模块的版本，目前官方提供的只有版本1，但是官方有可能会升级，为了避免升级出现的版本问题，所以这里固定为1
-    'disable_existing_loggers': False, # 是否禁用其他的已经存在的日志功能？肯定不能，有可能有些第三方模块在调用，所以禁用了以后，第三方模块无法捕获自身出现的异常了。
-    'formatters': { # 日志格式设置，verbose或者simple都是自定义的
-        'verbose': { # 详细格式，适合用于开发人员不在场的情况下的日志记录。
+    'version': 1,  # 使用的日志模块的版本，目前官方提供的只有版本1，但是官方有可能会升级，为了避免升级出现的版本问题，所以这里固定为1
+    'disable_existing_loggers': False,  # 是否禁用其他的已经存在的日志功能？肯定不能，有可能有些第三方模块在调用，所以禁用了以后，第三方模块无法捕获自身出现的异常了。
+    'formatters': {  # 日志格式设置，verbose或者simple都是自定义的
+        'verbose': {  # 详细格式，适合用于开发人员不在场的情况下的日志记录。
             # 格式定义：https://docs.python.org/3/library/logging.html#logrecord-attributes
             # levelname 日志等级
             # asctime   发生时间
@@ -138,9 +147,9 @@ LOGGING = {
             # thread    线程ID
             # message   异常信息
             'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
-            'style': '{', # 变量格式分隔符
+            'style': '{',  # 变量格式分隔符
         },
-        'simple': { # 简单格式，适合用于开发人员在场的情况下的终端输出
+        'simple': {  # 简单格式，适合用于开发人员在场的情况下的终端输出
             'format': '{levelname} {message}',
             'style': '{',
         },
@@ -150,12 +159,12 @@ LOGGING = {
             '()': 'django.utils.log.RequireDebugTrue',
         },
     },
-    'handlers': { # 日志处理流程，console或者mail_admins都是自定义的。
+    'handlers': {  # 日志处理流程，console或者mail_admins都是自定义的。
         'console': {
-            'level': 'DEBUG', # 设置当前日志处理流程中的日志最低等级
-            'filters': ['require_debug_true'], # 当前日志处理流程的日志过滤
+            'level': 'DEBUG',  # 设置当前日志处理流程中的日志最低等级
+            'filters': ['require_debug_true'],  # 当前日志处理流程的日志过滤
             'class': 'logging.StreamHandler',  # 当前日志处理流程的核心类，StreamHandler可以帮我们把日志信息输出到终端下
-            'formatter': 'simple'              # 当前日志处理流程的日志格式
+            'formatter': 'simple'  # 当前日志处理流程的日志格式
         },
         # 'mail_admins': {
         #     'level': 'ERROR',                  # 设置当前日志处理流程中的日志最低等级
@@ -177,8 +186,8 @@ LOGGING = {
     },
     'loggers': {  # 日志处理的命名空间
         'django': {
-            'handlers': ['console','file'], # 当基于django命名空间写入日志时，调用那几个日志处理流程
-            'propagate': True,   # 是否在django命名空间对应的日志处理流程结束以后，冒泡通知其他的日志功能。True表示允许
+            'handlers': ['console', 'file'],  # 当基于django命名空间写入日志时，调用那几个日志处理流程
+            'propagate': True,  # 是否在django命名空间对应的日志处理流程结束以后，冒泡通知其他的日志功能。True表示允许
         },
     }
 }
