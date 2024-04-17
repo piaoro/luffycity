@@ -1,17 +1,19 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from django_redis import get_redis_connection
-import logging
-# Create your views here.
-
-logger = logging.getLogger('django')
+from rest_framework.generics import ListAPIView
+from .models import Nav
+from .serializers import NavModelSerializers
+import constants
 
 
-class HomeAPIView(APIView):
-    def get(self, request):
-        # logger.debug('debug信息')
-        # logger.info("info信息")
-        redis = get_redis_connection("sms_code")
-        brother = redis.lrange("brother",0,-1)
-        return Response(brother,status=status.HTTP_200_OK)
+
+class NavHeaderListAPIView(ListAPIView):
+    queryset = Nav.objects.filter(position=constants.NAV_HEADER_POSITION, is_show=True, is_delete=False).order_by("orders",
+                                                                                                        "-id")[
+               :constants.NAV_HEADER_SIZE]
+    serializer_class = NavModelSerializers
+
+
+class NavFooterListAPIView(ListAPIView):
+    queryset = Nav.objects.filter(position=constants.NAV_FOOTER_POSITION, is_show=True, is_delete=False).order_by("orders",
+                                                                                                        "-id")[
+               :constants.NAV_FOOTER_SIZE]
+    serializer_class = NavModelSerializers
