@@ -6,7 +6,7 @@
   <router-view></router-view>
 </template>
 
-<style scoped>
+<style>
 body,h1,h2,h3,h4,p,table,tr,td,ul,li,a,form,input,select,option,textarea{
   margin: 0;
   padding: 0;
