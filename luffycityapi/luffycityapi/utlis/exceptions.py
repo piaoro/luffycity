@@ -32,4 +32,4 @@ def custom_exception_handler(exec,context):
             logger.error(f'redis数据库异常！[{view}] {exec}')
             response = Response({"message": "服务器内部错误"}, status=status.HTTP_507_INSUFFICIENT_STORAGE)
 
-    return Response
+    return response

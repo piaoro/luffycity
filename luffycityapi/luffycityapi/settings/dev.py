@@ -15,8 +15,8 @@ import sys
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-sys.path.insert(0,f"{BASE_DIR}/apps")
-sys.path.insert(0,f"{BASE_DIR}/utils")
+sys.path.insert(0, f"{BASE_DIR}/apps")
+sys.path.insert(0, f"{BASE_DIR}/utils")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'home',
+    'users',
 ]
 
 MIDDLEWARE = [
@@ -128,7 +129,7 @@ CACHES = {
         }
     },
     # 提供存储短信验证码
-    "sms_code":{
+    "sms_code": {
         "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": "redis://:@127.0.0.1:6379/2",
         "OPTIONS": {
@@ -254,5 +255,21 @@ LOGGING = {
 
 REST_FRAMEWORK = {
     # 自定义异常处理
-    'EXCEPTION_HANDLER': 'luffyciyapi.utils.exceptions.custom_exception_handler'
+    'EXCEPTION_HANDLER': 'luffycityapi.utlis.exceptions.custom_exception_handler',
+    # 自定义认证
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',  # jwt认证
+        'rest_framework.authentication.SessionAuthentication',  # session认证
+        'rest_framework.authentication.BasicAuthentication',
+    ),
+}
+
+AUTH_USER_MODEL = "users.User"
+
+import datetime
+
+JWT_AUTH = {
+    # 设置jwt的有效期
+    # 如果内部站点，例如：运维开发系统，OA，往往配置的access_token有效期基本就是15分钟，30分钟，1~2个小时
+    "JWT_EXPIRATION_DELTA": datetime.timedelta(days=1),
 }
