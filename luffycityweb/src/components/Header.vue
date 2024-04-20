@@ -40,7 +40,7 @@
     </div>
   </div>
   <el-dialog :width="600" v-model="state.show_login">
-      <Login></Login>
+      <Login @successheader="login_success"></Login>
   </el-dialog>
 </template>
 
@@ -53,7 +53,9 @@ import nav from "../api/nav.js";
 const state = reactive({
   show_login: false,
 })
-
+const login_success = ()=>{
+  state.show_login=false;
+}
 nav.get_header_nav().then(resp => {
   nav.header_nav_list = resp.data
 })
