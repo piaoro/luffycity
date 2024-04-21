@@ -31,6 +31,8 @@ import {reactive} from "vue";
 import user from "../api/user";
 import {ElMessage} from 'element-plus'
 const emit = defineEmits(["successheader",])
+import {useStore} from 'vuex'
+const store = useStore()
 
 const loginhandler = () => {
   if (user.account.length < 1 || user.password.length < 1) {
@@ -51,6 +53,9 @@ const loginhandler = () => {
     user.mobile = "";
     user.code = "";
     user.remember = false;
+    let playload = resp.data.token.split(".")[1]
+    let playload_data = JSON.parse(atob(playload))
+    store.commit('login', playload_data)
     emit("successheader");
 
   }).catch(error => {
