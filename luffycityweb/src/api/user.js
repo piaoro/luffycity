@@ -9,7 +9,7 @@ const user = reactive({
     code:"",
     mobile:"",
     login(){
-        return http.post("/users/login/", {"username":this.account,"password":this.account});
+        return http.post("/users/login/", {"username":this.account,"password":this.password});
     }
 })
 

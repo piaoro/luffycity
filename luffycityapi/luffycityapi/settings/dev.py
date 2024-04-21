@@ -264,7 +264,7 @@ REST_FRAMEWORK = {
     ),
 }
 
-AUTH_USER_MODEL = "users.User"
+
 
 import datetime
 
@@ -272,4 +272,12 @@ JWT_AUTH = {
     # 设置jwt的有效期
     # 如果内部站点，例如：运维开发系统，OA，往往配置的access_token有效期基本就是15分钟，30分钟，1~2个小时
     "JWT_EXPIRATION_DELTA": datetime.timedelta(days=1),
+    # 自定义载荷
+    'JWT_PAYLOAD_HANDLER': 'luffycityapi.utlis.authenticate.jwt_payload_handler',
 }
+
+
+AUTH_USER_MODEL = "users.User"
+
+# django自定义类
+AUTHENTICATION_BACKENDS = ['luffycityapi.utlis.authenticate.CustomAuthBackend',]
