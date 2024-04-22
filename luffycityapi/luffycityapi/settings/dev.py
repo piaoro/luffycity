@@ -281,3 +281,18 @@ AUTH_USER_MODEL = "users.User"
 
 # django自定义类
 AUTHENTICATION_BACKENDS = ['luffycityapi.utlis.authenticate.CustomAuthBackend',]
+
+# 腾讯云API接口配置
+TENCENTCLOUD = {
+    # 腾讯云访问秘钥ID
+    "SecretId": "AKIDGtNgojbP4fCiGxYm7Wmt0FMUSApvraCn",
+    # 腾讯云访问秘钥key
+    "SecretKey": "eO1nSDrUTb4Mfq3B741XxZEsZCj4SizS",
+    # 验证码API配置
+    "Captcha": {
+        "endpoint": "captcha.tencentcloudapi.com", # 验证码校验服务端域名
+        "CaptchaType": 9,  # 验证码类型，固定为9
+        "CaptchaAppId": 196923464,  # 验证码应用ID
+        "AppSecretKey": "dZB2ZktrL4EygYC3nNA5IGN8q", # 验证码应用key
+    },
+}

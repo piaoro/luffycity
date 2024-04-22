@@ -14,7 +14,8 @@
       </label>
       <p>忘记密码</p>
     </div>
-    <button class="login_btn" @click="loginhandler">登录</button>
+    <div id="captcha-element"></div>
+    <button class="login_btn" id="captcha-button" @click="show_captcha">登录</button>
     <p class="go_login">没有账号 <span>立即注册</span></p>
   </div>
   <div class="inp" v-show="user.login_type==1">
@@ -27,19 +28,34 @@
 </template>
 
 <script setup>
-import {reactive} from "vue";
+import {reactive, onBeforeUnmount, onMounted} from "vue";
 import user from "../api/user";
 import {ElMessage} from 'element-plus'
+import "../utils/TCaptcha.js"
+
 const emit = defineEmits(["successheader",])
 import {useStore} from 'vuex'
+
 const store = useStore()
 
-const loginhandler = () => {
+
+const show_captcha =() =>{
+  var captcha1 = new TencentCaptcha('196923464',(res)=>{
+    console.log(res);
+    loginhandler(res);
+  });
+  captcha1.show();
+}
+
+const loginhandler = (res) => {
   if (user.account.length < 1 || user.password.length < 1) {
     ElMessage.error("账户和密码不能为空");
     return;
   }
-  user.login().then(resp => {
+  user.login({
+    ticket: res.ticket,
+    randstr: res.randstr,
+  }).then(resp => {
     localStorage.removeItem("token");
     sessionStorage.removeItem('token');
     if (user.remember) {
