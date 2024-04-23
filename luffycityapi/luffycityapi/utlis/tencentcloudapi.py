@@ -4,12 +4,12 @@ from tencentcloud.common.profile.client_profile import ClientProfile
 from tencentcloud.common.profile.http_profile import HttpProfile
 from tencentcloud.common.exception.tencent_cloud_sdk_exception import TencentCloudSDKException
 from tencentcloud.captcha.v20190722 import captcha_client, models
-from django.conf import settings
 
+from luffycityapi.plugins import setting
 class TencentCloudAPI(object):
     """腾讯云API操作工具类"""
     def __init__(self):
-        self.cred = credential.Credential(settings.TENCENTCLOUD["SecretId"], settings.TENCENTCLOUD["SecretKey"])
+        self.cred = credential.Credential(setting.TENCENTCLOUD["SecretId"], setting.TENCENTCLOUD["SecretKey"])
 
     def captcha(self, ticket, randstr, user_ip):
         """
@@ -19,7 +19,7 @@ class TencentCloudAPI(object):
         :user_ip 客户端的IP地址
         """
         try:
-            Captcha = settings.TENCENTCLOUD["Captcha"]
+            Captcha = setting.TENCENTCLOUD["Captcha"]
 
             # 实例化http请求工具类
             httpProfile = HttpProfile()
