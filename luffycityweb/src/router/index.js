@@ -20,13 +20,21 @@ const routes = [
         path: '/login',
         name: 'Login',
         component: () => import("../views/Login.vue")
-    }
-    ,
+    },
+    {
+        meta: {
+            title: "luffy2.0-用户注册",
+            keepAlive: true
+        },
+        path: '/register',
+        name: "Register",            // 路由名称
+        component: () => import("../views/Register.vue"),         // uri绑定的组件页面
+    },
     {
         meta: {
             title: "luffy-个人中心",
             keepalive: true,
-            authorization:true
+            authorization: true
         },
         path: '/user',
         name: 'User',
@@ -35,15 +43,15 @@ const routes = [
 ]
 
 const router = createRouter({
-    history:createWebHistory(),
+    history: createWebHistory(),
     routes,
 });
 
-router.beforeEach((to,from,next)=>{
+router.beforeEach((to, from, next) => {
     document.title = to.meta.title
-    if(to.meta.authorization && !store.getters.getUserInfo){
-        next({"name":"Login"})
-    }else{
+    if (to.meta.authorization && !store.getters.getUserInfo) {
+        next({"name": "Login"})
+    } else {
         next()
     }
 })
