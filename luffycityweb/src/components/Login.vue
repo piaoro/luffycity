@@ -40,7 +40,7 @@ const store = useStore()
 
 
 const show_captcha =() =>{
-  var captcha1 = new TencentCaptcha('196923464',(res)=>{
+  var captcha1 = new TencentCaptcha(settings.captcha_app_id,(res)=>{
     console.log(res);
     loginhandler(res);
   });
