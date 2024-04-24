@@ -15,14 +15,14 @@
       <p>忘记密码</p>
     </div>
     <div id="captcha-element"></div>
-    <button class="login_btn" id="captcha-button" @click="show_captcha">登录</button>
+    <button class="login_btn" id="captcha-button" @click="show_captcha(1)">登录</button>
     <p class="go_login" >没有账号 <router-link to="/register">立即注册</router-link></p>
   </div>
   <div class="inp" v-show="user.login_type==1">
     <input v-model="user.mobile" type="text" placeholder="手机号码" class="user">
     <input v-model="user.code" type="text" class="code" placeholder="短信验证码">
-    <el-button id="get_code" type="primary">获取验证码</el-button>
-    <button class="login_btn">登录</button>
+    <el-button id="get_code" type="primary" @click="send_sms">{{user.sms_btn_text}}</el-button>
+    <button class="login_btn" @click="show_captcha(2)">登录</button>
     <p class="go_login" >没有账号 <router-link to="/register">立即注册</router-link></p>
   </div>
 </template>
@@ -35,14 +35,19 @@ import "../utils/TCaptcha.js"
 
 const emit = defineEmits(["successheader",])
 import {useStore} from 'vuex'
+import settings from "../settings";
 
 const store = useStore()
 
 
-const show_captcha =() =>{
+const show_captcha =(data)=>{
   var captcha1 = new TencentCaptcha(settings.captcha_app_id,(res)=>{
-    console.log(res);
-    loginhandler(res);
+    if(data===1){
+      loginhandler(res);
+    }else{
+      smsloginhandler(res)
+    }
+
   });
   captcha1.show();
 }
@@ -77,6 +82,42 @@ const loginhandler = (res) => {
   }).catch(error => {
     ElMessage.error(error?.response?.data?.non_field_errors[0]);
   })
+}
+
+const smsloginhandler = (res) =>{
+  if (user.mobile.length < 1 || user.code.length < 1) {
+    ElMessage.error("手机号和验证码不能为空");
+    return;
+  }
+  user.sms_login({
+    ticket: res.ticket,
+    randstr: res.randstr,
+  }).then(resp=>{
+    localStorage.removeItem("token");
+    sessionStorage.removeItem('token');
+    if (user.remember) {
+      localStorage.token = resp.data.token;
+    } else {
+      sessionStorage.tokem = resp.data.token;
+    }
+    ElMessage.success("登陆成功");
+    user.account = "";
+    user.password = "";
+    user.mobile = "";
+    user.code = "";
+    user.remember = false;
+    let playload = resp.data.token.split(".")[1]
+    let playload_data = JSON.parse(atob(playload))
+    store.commit('login', playload_data)
+    emit("successheader");
+  }).catch(error => {
+    ElMessage.error(error?.response?.data?.non_field_errors[0]);
+  })
+}
+
+
+const send_sms = ()=>{
+  user.send_sms()
 }
 </script>
 

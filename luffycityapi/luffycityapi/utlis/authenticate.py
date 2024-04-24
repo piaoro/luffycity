@@ -1,5 +1,6 @@
 from rest_framework_jwt.utils import jwt_payload_handler as payload_handler
 from django.contrib.auth.backends import ModelBackend, UserModel
+from rest_framework_jwt.settings import api_settings
 from django.db.models import Q
 
 
@@ -48,3 +49,14 @@ class CustomAuthBackend(ModelBackend):
         user = get_user_by_account(username)
         if user and user.check_password(password) and self.user_can_authenticate(user):
             return user
+
+
+def generate_jwt_token(user):
+    """
+    生成jwt token
+    @params user: 用户模型实例对象
+    """
+    jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
+    jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
+    payload = jwt_payload_handler(user)
+    return jwt_encode_handler(payload)

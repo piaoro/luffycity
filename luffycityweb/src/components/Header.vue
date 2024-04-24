@@ -34,7 +34,7 @@
             <router-link to="">我的课堂</router-link>
             <el-dropdown>
                 <span class="el-dropdown-link">
-                  <el-avatar class="avatar" size="50" src="../assets/avatar.jpg"></el-avatar>
+                  <el-avatar class="avatar" size="50" src="http://api.luffycity.cn:8000/uploads/avatar/2021/avatar.jpg"></el-avatar>
                 </span>
               <template #dropdown>
                 <el-dropdown-menu :append-to-body="false">
@@ -55,7 +55,7 @@
           <div class="login-box full-left">
             <span @click="state.show_login=true">登录</span>
             &nbsp;/&nbsp;
-            <span>注册</span>
+            <router-link to="/register">注册</router-link>
           </div>
         </div>
       </div>
