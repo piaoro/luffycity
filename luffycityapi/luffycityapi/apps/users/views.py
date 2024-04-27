@@ -1,6 +1,7 @@
 import random
 from django_redis import get_redis_connection
-from ronglianyunapi import send_sms
+# from luffycityapi.utlis.ronglianyunapi import send_sms
+from .task import send_sms
 from rest_framework_jwt.views import ObtainJSONWebToken
 from luffycityapi.utlis.tencentcloudapi import TencentCloudAPI, TencentCloudSDKException
 from rest_framework.response import Response
@@ -78,8 +79,8 @@ class SMSAPIView(APIView):
         time = setting.RONGLIANYUN.get("sms_expire")
         # 短信发送间隔时间
         sms_interval = setting.RONGLIANYUN["sms_interval"]
-        # 调用第三方sdk发送短信
-        send_sms(setting.RONGLIANYUN.get("reg_tid"), mobile, datas=(code, time // 60))
+        # 使用异步调用第三方sdk发送短信
+        send_sms.delay(setting.RONGLIANYUN.get("reg_tid"), mobile, datas=(code, time // 60))
 
         # 记录code到redis中，并以time作为有效期
         # 使用redis提供的管道对象pipeline来优化redis的写入操作[添加/修改/删除]

@@ -1,6 +1,7 @@
-import re, constants,random
+import re,random
+from luffycityapi.utlis import constants
 from rest_framework import serializers
-from authenticate import generate_jwt_token
+from luffycityapi.utlis.authenticate import generate_jwt_token
 from .models import User
 from luffycityapi.utlis.tencentcloudapi import TencentCloudAPI, TencentCloudSDKException
 from django_redis import get_redis_connection
