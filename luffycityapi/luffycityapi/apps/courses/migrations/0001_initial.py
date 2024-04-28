@@ -2,6 +2,8 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
+from ckeditor.fields import RichTextField  # 不支持上传文件
+from ckeditor_uploader.fields import RichTextUploadingField  # 支持上传文件
 
 
 class Migration(migrations.Migration):
@@ -26,7 +28,7 @@ class Migration(migrations.Migration):
                 ('course_video', models.FileField(blank=True, max_length=255, null=True, upload_to='course/video', verbose_name='封面视频')),
                 ('course_type', models.SmallIntegerField(choices=[(0, '付费购买'), (1, '会员专享'), (2, '学位课程')], default=0, verbose_name='付费类型')),
                 ('level', models.SmallIntegerField(choices=[(0, '初级'), (1, '中级'), (2, '高级')], default=1, verbose_name='难度等级')),
-                ('description', models.TextField(blank=True, null=True, verbose_name='详情介绍')),
+                ('description', RichTextUploadingField(blank=True, null=True, verbose_name='详情介绍')),
                 ('pub_date', models.DateField(auto_now_add=True, verbose_name='发布日期')),
                 ('period', models.IntegerField(default=7, verbose_name='建议学习周期(day)')),
                 ('attachment_path', models.FileField(blank=True, max_length=1000, null=True, upload_to='', verbose_name='课件路径')),
@@ -55,7 +57,7 @@ class Migration(migrations.Migration):
                 ('created_time', models.DateTimeField(auto_now_add=True, verbose_name='添加时间')),
                 ('updated_time', models.DateTimeField(auto_now=True, verbose_name='更新时间')),
                 ('orders', models.SmallIntegerField(default=1, verbose_name='第几章')),
-                ('summary', models.TextField(blank=True, null=True, verbose_name='章节介绍')),
+                ('summary', RichTextUploadingField(blank=True, null=True, verbose_name='章节介绍')),
                 ('pub_date', models.DateField(auto_now_add=True, verbose_name='发布日期')),
                 ('course', models.ForeignKey(db_constraint=False, on_delete=django.db.models.deletion.CASCADE, related_name='chapter_list', to='courses.course', verbose_name='课程名称')),
             ],
@@ -75,7 +77,7 @@ class Migration(migrations.Migration):
                 ('created_time', models.DateTimeField(auto_now_add=True, verbose_name='添加时间')),
                 ('updated_time', models.DateTimeField(auto_now=True, verbose_name='更新时间')),
                 ('name', models.CharField(max_length=255, unique=True, verbose_name='方向名称')),
-                ('remark', models.TextField(blank=True, default='', null=True, verbose_name='方向描述')),
+                ('remark', RichTextUploadingField(blank=True, default='', null=True, verbose_name='方向描述')),
                 ('recomment_home_hot', models.BooleanField(default=False, verbose_name='是否推荐到首页新课栏目')),
                 ('recomment_home_top', models.BooleanField(default=False, verbose_name='是否推荐到首页必学栏目')),
             ],
@@ -99,7 +101,7 @@ class Migration(migrations.Migration):
                 ('title', models.CharField(max_length=64, verbose_name='职位、职称')),
                 ('signature', models.CharField(blank=True, max_length=255, null=True, verbose_name='导师签名')),
                 ('avatar', models.ImageField(null=True, upload_to='teacher', verbose_name='讲师头像')),
-                ('brief', models.TextField(max_length=1024, verbose_name='讲师描述')),
+                ('brief', RichTextUploadingField(max_length=1024, verbose_name='讲师描述')),
             ],
             options={
                 'verbose_name': '讲师信息',
@@ -142,7 +144,7 @@ class Migration(migrations.Migration):
                 ('created_time', models.DateTimeField(auto_now_add=True, verbose_name='添加时间')),
                 ('updated_time', models.DateTimeField(auto_now=True, verbose_name='更新时间')),
                 ('name', models.CharField(max_length=255, unique=True, verbose_name='分类名称')),
-                ('remark', models.TextField(blank=True, default='', null=True, verbose_name='分类描述')),
+                ('remark', RichTextUploadingField(blank=True, default='', null=True, verbose_name='分类描述')),
                 ('direction', models.ForeignKey(db_constraint=False, on_delete=django.db.models.deletion.DO_NOTHING, related_name='category_list', to='courses.coursedirection', verbose_name='学习方向')),
             ],
             options={
