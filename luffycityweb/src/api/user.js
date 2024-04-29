@@ -15,33 +15,36 @@ const user = reactive({
     sms_interval: 60,// 间隔时间
     interval: null,  // 定时器的标记
     avatar: "",
-    sms_login(res) {
-        res.val_mobile = this.mobile
-        res.sms_code = this.code
-        return http.post("/users/sms_login/", res);
+    sms_login() {
+        return http.post("/users/sms_login/", {
+            "val_mobile": this.mobile,
+            "sms_code": this.code,
+        });
     },
-    login(res) {
-        res.username = this.account
-        res.password = this.password
-        return http.post("/users/login/", res);
+    login() {
+        return http.post("/users/login/", {
+            "username": this.account,
+            "password": this.password,
+        });
     },
     check_mobile() {
         // 验证手机号
         return http.get(`/users/mobile/${this.mobile}/`)
     },
-    register(data) {
-        data.mobile = this.mobile
-        data.re_password = this.re_password
-        data.password = this.password
-        data.sms_code = this.code
+    register() {
         // 用户注册请求
-        return http.post("/users/register/", data)
+        return http.post("/users/register/", {
+            "mobile": this.mobile,
+            "password": this.password,
+            "sms_code": this.code,
+            "re_password": this.re_password
+        })
     },
     get_sms_code() {
         return http.get(`/users/sms/${this.mobile}/`)
     },
     // 发送短信
-    send_sms(){
+    send_sms() {
         if (!/1[3-9]\d{9}/.test(user.mobile)) {
             ElMessage.error("手机号格式有误！")
             return false

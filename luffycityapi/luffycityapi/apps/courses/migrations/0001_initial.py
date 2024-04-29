@@ -4,6 +4,8 @@ from django.db import migrations, models
 import django.db.models.deletion
 from ckeditor.fields import RichTextField  # 不支持上传文件
 from ckeditor_uploader.fields import RichTextUploadingField  # 支持上传文件
+from stdimage import StdImageField
+from django.utils.safestring import mark_safe
 
 
 class Migration(migrations.Migration):
@@ -24,7 +26,7 @@ class Migration(migrations.Migration):
                 ('is_show', models.BooleanField(default=True, verbose_name='是否显示')),
                 ('created_time', models.DateTimeField(auto_now_add=True, verbose_name='添加时间')),
                 ('updated_time', models.DateTimeField(auto_now=True, verbose_name='更新时间')),
-                ('course_cover', models.ImageField(blank=True, max_length=255, null=True, upload_to='course/cover', verbose_name='封面图片')),
+                ('course_cover', StdImageField(blank=True, max_length=255, null=True, upload_to='course/cover', verbose_name='封面图片')),
                 ('course_video', models.FileField(blank=True, max_length=255, null=True, upload_to='course/video', verbose_name='封面视频')),
                 ('course_type', models.SmallIntegerField(choices=[(0, '付费购买'), (1, '会员专享'), (2, '学位课程')], default=0, verbose_name='付费类型')),
                 ('level', models.SmallIntegerField(choices=[(0, '初级'), (1, '中级'), (2, '高级')], default=1, verbose_name='难度等级')),
@@ -100,7 +102,7 @@ class Migration(migrations.Migration):
                 ('role', models.SmallIntegerField(choices=[(0, '讲师'), (1, '导师'), (2, '班主任')], default=0, verbose_name='讲师身份')),
                 ('title', models.CharField(max_length=64, verbose_name='职位、职称')),
                 ('signature', models.CharField(blank=True, max_length=255, null=True, verbose_name='导师签名')),
-                ('avatar', models.ImageField(null=True, upload_to='teacher', verbose_name='讲师头像')),
+                ('avatar', StdImageField(null=True, upload_to='teacher', verbose_name='讲师头像')),
                 ('brief', RichTextUploadingField(max_length=1024, verbose_name='讲师描述')),
             ],
             options={

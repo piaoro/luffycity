@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
-import sys
+import sys,os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',  # cors跨域子应用
     'ckeditor',   # 富文本编辑器
+    'stdimage',  # 生成缩略图
     'home',
     'users',
     'courses',
@@ -184,8 +185,9 @@ USE_TZ = True
 STATIC_URL = '/static/'
 # 设置django的静态文件目录[手动创建]
 STATICFILES_DIRS = [
-    BASE_DIR / "static",
+    os.path.join(BASE_DIR, 'static'),
 ]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # 项目中存储上传文件的根目录[手动创建]，注意，uploads目录需要手动创建否则上传文件时报错
 MEDIA_ROOT = BASE_DIR / "uploads"
@@ -354,3 +356,20 @@ CKEDITOR_CONFIGS = {
         'height': 120,
     },
 }
+
+# admin站点公共配置
+from django.contrib import admin
+admin.AdminSite.site_header = 'luffycity教育'
+admin.AdminSite.site_title = 'luffycity教育站点管理'
+# 登录界面logo
+SIMPLEUI_LOGO = '/uploads/logo.svg'
+# 快速操作
+SIMPLEUI_HOME_QUICK = True
+# 服务器信息
+SIMPLEUI_HOME_INFO = False
+# 关闭simpleui内置的使用分析
+SIMPLEUI_ANALYSIS = False
+# 离线模式
+SIMPLEUI_STATIC_OFFLINE = True
+# 首页图标地址
+SIMPLEUI_INDEX = 'http://www.luffycity.cn:3000/'

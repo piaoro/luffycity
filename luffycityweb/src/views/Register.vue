@@ -54,19 +54,20 @@ watch(() => user.mobile, (mobile, prevMobile) => {
 })
 // 显示登录验证码
 const show_captcha = () => {
+  registerhandler()
   // 直接生成一个验证码对象
-  let captcha1 = new TencentCaptcha(settings.captcha_app_id, (res) => {
-    // 验证码通过验证以后的回调方法
-    if (res && res.ret === 0) {
-      // 验证通过，发送登录请求
-      registerhandler(res)
-    }
-  });
+  // let captcha1 = new TencentCaptcha(settings.captcha_app_id, (res) => {
+  //   // 验证码通过验证以后的回调方法
+  //   if (res && res.ret === 0) {
+  //     // 验证通过，发送登录请求
+  //     registerhandler(res)
+  //   }
+// });
 
   // 显示验证码
-  captcha1.show();
+  // captcha1.show();
 }
-const registerhandler = (res) => {
+const registerhandler = () => {
   // 注册处理
   if (!/^1[3-9]\d{9}$/.test(user.mobile)) {
     // 错误提示
@@ -84,11 +85,7 @@ const registerhandler = (res) => {
   }
 
   // 发送请求
-  user.register({
-    // 验证码通过的票据信息
-    ticket: res.ticket,
-    randstr: res.randstr,
-  }).then(response => {
+  user.register().then(response => {
     // 保存token，并根据用户的选择，是否记住密码
     localStorage.removeItem("token");
     sessionStorage.removeItem("token");

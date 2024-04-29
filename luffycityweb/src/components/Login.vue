@@ -41,26 +41,28 @@ const store = useStore()
 
 
 const show_captcha =(data)=>{
-  var captcha1 = new TencentCaptcha(settings.captcha_app_id,(res)=>{
-    if(data===1){
-      loginhandler(res);
+  if(data===1){
+      loginhandler();
     }else{
-      smsloginhandler(res)
+      smsloginhandler()
     }
-
-  });
-  captcha1.show();
+  // var captcha1 = new TencentCaptcha(settings.captcha_app_id,(res)=>{
+  //   if(data===1){
+  //     loginhandler(res);
+  //   }else{
+  //     smsloginhandler(res)
+  //   }
+  //
+  // });
+  // captcha1.show();
 }
 
-const loginhandler = (res) => {
+const loginhandler = () => {
   if (user.account.length < 1 || user.password.length < 1) {
     ElMessage.error("账户和密码不能为空");
     return;
   }
-  user.login({
-    ticket: res.ticket,
-    randstr: res.randstr,
-  }).then(resp => {
+  user.login().then(resp => {
     localStorage.removeItem("token");
     sessionStorage.removeItem('token');
     if (user.remember) {
@@ -84,15 +86,12 @@ const loginhandler = (res) => {
   })
 }
 
-const smsloginhandler = (res) =>{
+const smsloginhandler = () =>{
   if (user.mobile.length < 1 || user.code.length < 1) {
     ElMessage.error("手机号和验证码不能为空");
     return;
   }
-  user.sms_login({
-    ticket: res.ticket,
-    randstr: res.randstr,
-  }).then(resp=>{
+  user.sms_login().then(resp=>{
     localStorage.removeItem("token");
     sessionStorage.removeItem('token');
     if (user.remember) {

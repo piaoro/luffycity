@@ -21,19 +21,20 @@ class UserSmsAPIView(CreateAPIView):
 
 class LoginAPIView(ObtainJSONWebToken):
     def post(self, request, *args, **kwargs):
-        try:
-            api = TencentCloudAPI()
-            result = api.captcha(
-                request.data.get("ticket"),
-                request.data.get("randstr"),
-                request._request.META.get("REMOTE_ADDR"),
-            )
-            if result:
-                return super().post(request, *args, **kwargs)
-            else:
-                raise TencentCloudSDKException
-        except TencentCloudSDKException as err:
-            return Response({"errmsg": "验证码校验失败！"}, status=status.HTTP_400_BAD_REQUEST)
+        return super().post(request, *args, **kwargs)
+        # try:
+        #     api = TencentCloudAPI()
+        #     result = api.captcha(
+        #         request.data.get("ticket"),
+        #         request.data.get("randstr"),
+        #         request._request.META.get("REMOTE_ADDR"),
+        #     )
+        #     if result:
+        #         return super().post(request, *args, **kwargs)
+        #     else:
+        #         raise TencentCloudSDKException
+        # except TencentCloudSDKException as err:
+        #     return Response({"errmsg": "验证码校验失败！"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class MobileAPIView(APIView):
@@ -75,6 +76,7 @@ class SMSAPIView(APIView):
         # 基于随机数生成短信验证码
         # code = "%06d" % random.randint(0, 999999)
         code = f"{random.randint(0, 9999):04d}"
+        print(code)
         # 获取短信有效期的时间
         time = setting.RONGLIANYUN.get("sms_expire")
         # 短信发送间隔时间

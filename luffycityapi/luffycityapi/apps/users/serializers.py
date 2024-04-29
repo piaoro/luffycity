@@ -11,12 +11,13 @@ class UserSmsLoginModelSerializer(serializers.ModelSerializer):
     val_mobile = serializers.IntegerField(required=True,write_only=True,help_text="手机号验证")
     sms_code = serializers.CharField(min_length=4, max_length=6, required=True, write_only=True, help_text="短信验证码")
     token = serializers.CharField(read_only=True)
-    ticket = serializers.CharField(required=True, write_only=True, help_text="滑块验证码的临时凭证")
-    randstr = serializers.CharField(required=True, write_only=True, help_text="滑块验证码的随机字符串")
+    # ticket = serializers.CharField(required=True, write_only=True, help_text="滑块验证码的临时凭证")
+    # randstr = serializers.CharField(required=True, write_only=True, help_text="滑块验证码的随机字符串")
 
     class Meta:
         model = User
-        fields = ["val_mobile","sms_code", "token", "ticket", "randstr"]
+        # fields = ["val_mobile","sms_code", "token", "ticket", "randstr"]
+        fields = ["val_mobile", "sms_code", "token"]
 
     def validate(self, data):
         """验证客户端数据"""
@@ -29,17 +30,17 @@ class UserSmsLoginModelSerializer(serializers.ModelSerializer):
             User.objects.get(mobile=mobile)
         except User.DoesNotExist:
             raise serializers.ValidationError(detail="手机号未注册！")
-        # 验证防水墙验证码
-        api = TencentCloudAPI()
-        result = api.captcha(
-            data.get("ticket"),
-            data.get("randstr"),
-            self.context['request']._request.META.get("REMOTE_ADDR"),  # 客户端IP
-        )
+        # # 验证防水墙验证码
+        # api = TencentCloudAPI()
+        # result = api.captcha(
+        #     data.get("ticket"),
+        #     data.get("randstr"),
+        #     self.context['request']._request.META.get("REMOTE_ADDR"),  # 客户端IP
+        # )
 
-        if not result:
-            raise serializers.ValidationError(detail="滑块验证码校验失败！")
-            # 验证短信验证码
+        # if not result:
+        #     raise serializers.ValidationError(detail="滑块验证码校验失败！")
+        # 验证短信验证码
         redis = get_redis_connection("sms_code")
         code = redis.get(f'sms_{mobile}')
         if code is None:
@@ -71,12 +72,13 @@ class UserRegisterModelSerializer(serializers.ModelSerializer):
     re_password = serializers.CharField(required=True, write_only=True, help_text="确认密码")
     sms_code = serializers.CharField(min_length=4, max_length=6, required=True, write_only=True, help_text="短信验证码")
     token = serializers.CharField(read_only=True)
-    ticket = serializers.CharField(required=True, write_only=True, help_text="滑块验证码的临时凭证")
-    randstr = serializers.CharField(required=True, write_only=True, help_text="滑块验证码的随机字符串")
+    # ticket = serializers.CharField(required=True, write_only=True, help_text="滑块验证码的临时凭证")
+    # randstr = serializers.CharField(required=True, write_only=True, help_text="滑块验证码的随机字符串")
 
     class Meta:
         model = User
-        fields = ["mobile", "password", "re_password", "sms_code", "token", "ticket", "randstr"]
+        # fields = ["mobile", "password", "re_password", "sms_code", "token", "ticket", "randstr"]
+        fields = ["mobile", "password", "re_password", "sms_code"]
         extra_kwargs = {
             "mobile": {
                 "required": True, "write_only": True
@@ -106,16 +108,16 @@ class UserRegisterModelSerializer(serializers.ModelSerializer):
         except User.DoesNotExist:
             pass
 
-        # 验证防水墙验证码
-        api = TencentCloudAPI()
-        result = api.captcha(
-            data.get("ticket"),
-            data.get("randstr"),
-            self.context['request']._request.META.get("REMOTE_ADDR"),  # 客户端IP
-        )
-
-        if not result:
-            raise serializers.ValidationError(detail="滑块验证码校验失败！")
+        # # 验证防水墙验证码
+        # api = TencentCloudAPI()
+        # result = api.captcha(
+        #     data.get("ticket"),
+        #     data.get("randstr"),
+        #     self.context['request']._request.META.get("REMOTE_ADDR"),  # 客户端IP
+        # )
+        #
+        # if not result:
+        #     raise serializers.ValidationError(detail="滑块验证码校验失败！")
 
         # 验证短信验证码
         redis = get_redis_connection("sms_code")
@@ -141,7 +143,6 @@ class UserRegisterModelSerializer(serializers.ModelSerializer):
             avatar=constants.DEFAULT_USER_AVATAR,
             password=password,
         )
-        print(user,type(user))
 
         # 注册成功以后，免登陆
         user.token = generate_jwt_token(user)
