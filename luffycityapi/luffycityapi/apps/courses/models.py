@@ -82,7 +82,6 @@ class Course(BaseModel):
         verbose_name = "课程信息"
         verbose_name_plural = verbose_name
 
-
     def course_cover_small(self):
         if self.course_cover:
             return mark_safe(f'<img style="border-radius: 0%;" src="{self.course_cover.thumb_108x61.url}">')
@@ -109,6 +108,16 @@ class Course(BaseModel):
     course_cover_large.short_description = "封面图片(1080x608)"
     course_cover_large.allow_tags = True
     course_cover_large.admin_order_field = "course_cover"
+
+    @property
+    def discount(self):
+        # todo 将来通过计算获取当前课程的折扣优惠相关的信息
+        import random
+        return {
+            "type": ["限时优惠", "限时减免"].pop(random.randint(0, 1)),  # 优惠类型
+            "expire": random.randint(100000, 1200000),  # 优惠倒计时
+            "price": self.price - random.randint(1, 10) * 10,  # 优惠价格
+        }
 
 
 class Teacher(BaseModel):

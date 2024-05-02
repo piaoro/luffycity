@@ -141,3 +141,4 @@ cython_debug/
 luffycityapi/plugins/
 logs/
 luffycityapi/staticfiles/
+scripts/
