@@ -49,6 +49,15 @@ const routes = [
         name: "Course",            // 路由名称
         component: () => import("../views/Course.vue"),         // uri绑定的组件页面
     },
+    {
+        meta:{
+            title: "luffy2.0-课程详情",
+            keepAlive: true
+        },
+        path: '/project/:id',     // :id vue的路径参数，代表了课程的ID
+        name: "Info",
+        component: ()=> import("../views/Info.vue"),
+    }
 ]
 
 const router = createRouter({

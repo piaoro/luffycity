@@ -17,13 +17,13 @@
         </ul>
         <div class="search-warp">
           <div class="search-area">
-            <input class="search-input" placeholder="请输入关键字..." type="text" autocomplete="off">
+            <input class="search-input" placeholder="请输入关键字..." v-model="text" type="text" autocomplete="off">
             <div class="hotTags">
               <router-link to="/search/?words=Vue" target="_blank" class="">Vue</router-link>
               <router-link to="/search/?words=Python" target="_blank" class="last">Python</router-link>
             </div>
           </div>
-          <div class="showhide-search" data-show="no"><img class="imv2-search2" src="../assets/search.svg"/></div>
+          <div class="showhide-search" data-show="no"><img class="imv2-search2" src="../assets/search.svg" @click.prevent="search_text"/></div>
         </div>
         <div class="login-bar logined-bar" v-if="store.state.user.user_id">
           <div class="shop-cart ">
@@ -68,14 +68,14 @@
 
 
 <script setup>
-import {reactive} from "vue";
+import {reactive,defineEmits,ref} from "vue";
 import {UserFilled, List, Setting, Position} from '@element-plus/icons-vue'
 import Login from "./Login.vue";
 import nav from "../api/nav.js";
 
 import {useStore} from 'vuex'
+const text = ref(null)
 const store = useStore()
-
 const state = reactive({
   show_login: false,
 })
@@ -88,6 +88,10 @@ const logout = ()=>{
 nav.get_header_nav().then(resp => {
   nav.header_nav_list = resp.data
 })
+let emit = defineEmits(["search_text"])
+const search_text = ()=>{
+  emit("search_text",text)
+}
 </script>
 
 <style scoped>

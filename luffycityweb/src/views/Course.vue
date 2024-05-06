@@ -1,6 +1,6 @@
 <template>
   <div class="course">
-    <Header></Header>
+    <Header @search_text="get_text"></Header>
     <div class="top-wrap">
       <div class="actual-header">
         <div class="actual-header-wrap">
@@ -11,15 +11,16 @@
           </div>
           <div class="actual-header-search">
             <div class="search-inner">
-              <input class="actual-search-input" placeholder="搜索感兴趣的实战课程内容" type="text" autocomplete="off">
-              <img class="actual-search-button" src="../assets/search.svg"/>
+              <input class="actual-search-input" placeholder="搜索感兴趣的实战课程内容" v-model="course.text" type="text" autocomplete="off">
+              <img class="actual-search-button" src="../assets/search.svg" @click.prevent.stop="get_course_list"/>
             </div>
             <div class="actual-searchtags">
             </div>
             <div class="search-hot">
               <span>热搜：</span>
-              <a href="">Java工程师</a>
-              <a href="">Vue</a>
+              <a href="" @click.prevent.stop="search_by_hotword(hot_word)" v-for="hot_word in course.hot_word_list">
+                  {{hot_word}}
+              </a>
             </div>
           </div>
         </div>
@@ -66,7 +67,7 @@
         <ul class="course-list clearfix">
 
           <li class="course-card" v-for="course_info in course.course_list">
-            <a target="_blank" href="">
+            <router-link :to="`/project/${course_info.id}`">
               <div class="img"><img :src="course_info.course_cover" alt=""></div>
               <p class="title ellipsis2">{{ course_info.name }}</p>
               <p class="one">
@@ -87,7 +88,7 @@
                       v-if="course_info.discount.price">￥{{ parseFloat(course_info.price).toFixed(2) }}</span>
                 <span class="add-shop-cart r"><img class="icon imv2-shopping-cart" src="../assets/cart2.svg">加购物车</span>
               </p>
-            </a>
+            </router-link>
           </li>
 
         </ul>
@@ -133,9 +134,27 @@ const get_category = () => {
 
 get_category();
 
+const get_hot_word = ()=>{
+  // 搜索热门关键字列表
+  course.get_hot_word().then(response =>{
+    course.hot_word_list = response.data
+  })
+}
+
+const get_text = (text) =>{
+  course.text = text
+  get_course_list()
+}
+
 const get_course_list = (param) => {
+  let ret = null
+  if(course.text){
+    ret = course.search_course()
+  }else{
+    ret = course.get_course_list(param)
+  }
   // 获取课程列表
-  course.get_course_list(param).then(response => {
+  ret.then(response => {
     course.course_list = response.data.results;
     // 总数据量
     course.count = response.data.count;
@@ -144,8 +163,15 @@ const get_course_list = (param) => {
     // 优惠活动的倒计时
     course.start_timer();
   })
+  get_hot_word()
 }
 get_course_list(course.page);
+
+// 当热搜词被点击，进行搜索
+const search_by_hotword = (hot_word)=>{
+  course.text = hot_word
+  get_course_list()
+}
 
 
 watch(
