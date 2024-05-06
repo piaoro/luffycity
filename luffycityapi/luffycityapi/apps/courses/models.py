@@ -1,14 +1,17 @@
+import json
 from luffycityapi.utlis.models import models, BaseModel
-from ckeditor.fields import RichTextField  # 不支持上传文件
+
+# from ckeditor.fields import RichTextField  # 不支持上传文件
 from ckeditor_uploader.fields import RichTextUploadingField  # 支持上传文件
 from stdimage import StdImageField
 from django.utils.safestring import mark_safe
+from django.utils import timezone as datetime
 
 
 # Create your models here.
 class CourseDirection(BaseModel):
     name = models.CharField(max_length=255, unique=True, verbose_name="方向名称")
-    remark = RichTextField(default="", blank=True, null=True, verbose_name="方向描述")
+    remark = RichTextUploadingField(default="", blank=True, null=True, verbose_name="方向描述")
     recomment_home_hot = models.BooleanField(default=False, verbose_name="是否推荐到首页新课栏目")
     recomment_home_top = models.BooleanField(default=False, verbose_name="是否推荐到首页必学栏目")
 
@@ -23,7 +26,7 @@ class CourseDirection(BaseModel):
 
 class CourseCategory(BaseModel):
     name = models.CharField(max_length=255, unique=True, verbose_name="分类名称")
-    remark = RichTextField(default="", blank=True, null=True, verbose_name="分类描述")
+    remark = RichTextUploadingField(default="", blank=True, null=True, verbose_name="分类描述")
     direction = models.ForeignKey("CourseDirection", related_name="category_list", db_constraint=False,
                                   on_delete=models.DO_NOTHING, verbose_name="学习方向")
 
@@ -31,6 +34,9 @@ class CourseCategory(BaseModel):
         db_table = "fg_course_category"
         verbose_name = "课程分类"
         verbose_name_plural = verbose_name
+
+    def __str__(self):
+        return self.name
 
 
 class Course(BaseModel):
@@ -53,7 +59,7 @@ class Course(BaseModel):
                                              'thumb_540x304': (540, 304),  # 中等比例,
                                              'thumb_108x61': (108, 61, True),  # 小图(第三个参数表示保持图片质量)
                                              }, delete_orphans=True, upload_to="course/cover", max_length=255,
-                                 verbose_name="封面图片", blank=True, )
+                                 verbose_name="封面图片", blank=True, null=True)
     course_video = models.FileField(upload_to="course/video", max_length=255, verbose_name="封面视频", blank=True,
                                     null=True)
     course_type = models.SmallIntegerField(choices=course_type, default=0, verbose_name="付费类型")
@@ -81,6 +87,9 @@ class Course(BaseModel):
         db_table = "fg_course_info"
         verbose_name = "课程信息"
         verbose_name_plural = verbose_name
+
+    def __str__(self):
+        return "%s" % self.name
 
     def course_cover_small(self):
         if self.course_cover:
@@ -116,8 +125,18 @@ class Course(BaseModel):
         return {
             "type": ["限时优惠", "限时减免"].pop(random.randint(0, 1)),  # 优惠类型
             "expire": random.randint(100000, 1200000),  # 优惠倒计时
-            "price": self.price - random.randint(1, 10) * 10,  # 优惠价格
+            "price": float(self.price - random.randint(1, 10) * 10),  # 优惠价格
         }
+
+    def discount_json(self):
+        # 必须转成字符串才能保存到es中。所以该方法提供给es使用的。
+        return json.dumps(self.discount)
+
+    @property
+    def can_free_study(self):
+        """是否允许试学"""
+        lesson_list = self.lesson_list.filter(is_delete=False, is_show=True).order_by("orders").all()
+        return len(lesson_list) > 0
 
 
 class Teacher(BaseModel):
@@ -140,6 +159,9 @@ class Teacher(BaseModel):
         db_table = "fg_teacher"
         verbose_name = "讲师信息"
         verbose_name_plural = verbose_name
+
+    def __str__(self):
+        return "%s" % self.name
 
     def avatar_small(self):
         if self.avatar:
@@ -194,6 +216,19 @@ class CourseChapter(BaseModel):
     text.allow_tags = True
     text.admin_order_field = "orders"
 
+    def get_lesson_list(self):
+        """返回当前章节的课时列表"""
+        lesson_list = self.lesson_list.filter(is_delete=False, is_show=True).order_by("orders").all()
+        return [{
+            "id": lesson.id,
+            "name": lesson.name,
+            "orders": lesson.orders,
+            "duration": lesson.duration,
+            "lesson_type": lesson.lesson_type,
+            "lesson_link": lesson.lesson_link,
+            "free_trail": lesson.free_trail
+        } for lesson in lesson_list]
+
 
 class CourseLesson(BaseModel):
     """课程课时"""
@@ -231,3 +266,60 @@ class CourseLesson(BaseModel):
     text2.short_description = "课时名称"
     text2.allow_tags = True
     text2.admin_order_field = "orders"
+
+
+class Activity(BaseModel):
+    start_time = models.DateTimeField(default=datetime.now, verbose_name="开始时间")
+    end_time = models.DateTimeField(default=datetime.now, verbose_name="结束时间")
+    description = RichTextUploadingField(blank=True, null=True, verbose_name="活动介绍")
+    remark = models.TextField(blank=True, null=True, verbose_name="备注信息")
+
+    class Meta:
+        db_table = "fg_activity"
+        verbose_name = "优惠活动"
+        verbose_name_plural = verbose_name
+
+    def __str__(self):
+        return self.name
+
+
+class DiscountType(BaseModel):
+    remark = models.CharField(max_length=250, blank=True, null=True, verbose_name="备注信息")
+
+    class Meta:
+        db_table = "fg_discount_type"
+        verbose_name = "优惠类型"
+        verbose_name_plural = verbose_name
+
+    def __str__(self):
+        return self.name
+
+class Discount(BaseModel):
+    discount_type = models.ForeignKey("DiscountType", on_delete=models.CASCADE, related_name='discount_list', db_constraint=False, verbose_name="优惠类型")
+    condition = models.IntegerField(blank=True, default=0, verbose_name="满足优惠的价格条件", help_text="设置享受优惠的价格条件,如果不填或0则没有优惠门槛")
+    sale = models.TextField(verbose_name="优惠公式", help_text="""
+    0表示免费；<br>
+    *号开头表示折扣价，例如填写*0.82,则表示八二折；<br>
+    -号开头表示减免价, 例如填写-100,则表示减免100；<br>""")
+
+    class Meta:
+        db_table = "fg_discount"
+        verbose_name = "优惠公式"
+        verbose_name_plural = verbose_name
+
+    def __str__(self):
+        return "价格优惠:%s,优惠条件:%s,优惠公式: %s" % (self.discount_type.name, self.condition, self.sale)
+
+
+class CourseActivityPrice(BaseModel):
+    activity = models.ForeignKey("Activity", on_delete=models.CASCADE, related_name='price_list', db_constraint=False, verbose_name="活动")
+    course = models.ForeignKey("Course", on_delete=models.CASCADE, related_name='price_list', db_constraint=False, verbose_name="课程")
+    discount = models.ForeignKey("Discount", on_delete=models.CASCADE, related_name='price_list', db_constraint=False, verbose_name="优惠")
+
+    class Meta:
+        db_table = "fg_course_activity_price"
+        verbose_name = "课程参与活动的价格表"
+        verbose_name_plural = verbose_name
+
+    def __str__(self):
+        return "活动:%s-课程:%s-优惠公式:%s" % (self.activity.name, self.course.name, self.discount.sale)

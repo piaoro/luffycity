@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
-import sys,os
+import sys, os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -41,8 +41,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',  # cors跨域子应用
-    'ckeditor',   # 富文本编辑器
+    'ckeditor',  # 富文本编辑器
     'stdimage',  # 生成缩略图
+    'haystack',
     'home',
     'users',
     'courses',
@@ -69,7 +70,9 @@ ROOT_URLCONF = 'luffycityapi.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            BASE_DIR / "templates",  # BASE_DIR 是apps的父级目录，是主应用目录，templates需要手动创建
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -140,7 +143,15 @@ CACHES = {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
             "CONNECTION_POOL_KWARGS": {"max_connections": 100},
         }
-    }
+    },
+    # 提供存储搜索热门关键字
+    "hot_word": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://:@127.0.0.1:6379/3",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    },
 }
 
 # 设置用户登录admin站点时,记录登录状态的session保存到redis缓存中
@@ -177,7 +188,7 @@ USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+USE_TZ = False
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
@@ -269,8 +280,6 @@ REST_FRAMEWORK = {
     ),
 }
 
-
-
 import datetime
 
 JWT_AUTH = {
@@ -281,11 +290,10 @@ JWT_AUTH = {
     'JWT_PAYLOAD_HANDLER': 'luffycityapi.utlis.authenticate.jwt_payload_handler',
 }
 
-
 AUTH_USER_MODEL = "users.User"
 
 # django自定义类
-AUTHENTICATION_BACKENDS = ['luffycityapi.utlis.authenticate.CustomAuthBackend',]
+AUTHENTICATION_BACKENDS = ['luffycityapi.utlis.authenticate.CustomAuthBackend', ]
 
 # 腾讯云API接口配置
 TENCENTCLOUD = {
@@ -295,10 +303,10 @@ TENCENTCLOUD = {
     "SecretKey": "eO1nSDrUTb4Mfq3B741XxZEsZCj4SizS",
     # 验证码API配置
     "Captcha": {
-        "endpoint": "captcha.tencentcloudapi.com", # 验证码校验服务端域名
+        "endpoint": "captcha.tencentcloudapi.com",  # 验证码校验服务端域名
         "CaptchaType": 9,  # 验证码类型，固定为9
         "CaptchaAppId": 196923464,  # 验证码应用ID
-        "AppSecretKey": "dZB2ZktrL4EygYC3nNA5IGN8q", # 验证码应用key
+        "AppSecretKey": "dZB2ZktrL4EygYC3nNA5IGN8q",  # 验证码应用key
     },
 }
 
@@ -322,7 +330,7 @@ CELERYD_TIME_LIMIT = 10 * 60
 # 任务发出后，经过一段时间还未收到acknowledge, 就将任务重新交给其他worker执行
 CELERY_DISABLE_RATE_LIMITS = True
 # celery的任务结果内容格式
-CELERY_ACCEPT_CONTENT = ['json','pickle']
+CELERY_ACCEPT_CONTENT = ['json', 'pickle']
 # 之前定时任务（定时一次调用），使用了apply_async({}, countdown=30);
 # 设置定时任务（定时多次调用）的调用列表，需要单独运行SCHEDULE命令才能让celery执行定时任务：celery -A mycelery.main beat，当然worker还是要启动的
 # https://docs.celeryproject.org/en/stable/userguide/periodic-tasks.html
@@ -359,6 +367,7 @@ CKEDITOR_CONFIGS = {
 
 # admin站点公共配置
 from django.contrib import admin
+
 admin.AdminSite.site_header = 'luffycity教育'
 admin.AdminSite.site_title = 'luffycity教育站点管理'
 # 登录界面logo
@@ -373,3 +382,18 @@ SIMPLEUI_ANALYSIS = False
 SIMPLEUI_STATIC_OFFLINE = True
 # 首页图标地址
 SIMPLEUI_INDEX = 'http://www.luffycity.cn:3000/'
+
+# haystack连接elasticsearch的配置信息
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        # haystack操作es的核心模块
+        'ENGINE': 'haystack.backends.elasticsearch7_backend.Elasticsearch7SearchEngine',
+        # es服务端地址
+        'URL': 'http://127.0.0.1:9200/',
+        # es索引仓库
+        'INDEX_NAME': 'haystack',
+    },
+}
+
+# 当mysqlORM操作数据库改变时，自动更新es的索引，否则es的索引会找不到新增的数据
+HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'

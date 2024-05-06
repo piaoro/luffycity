@@ -2,7 +2,7 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
-from ckeditor.fields import RichTextField  # 不支持上传文件
+# from ckeditor.fields import RichTextField  # 不支持上传文件
 from ckeditor_uploader.fields import RichTextUploadingField  # 支持上传文件
 from stdimage import StdImageField
 from django.utils.safestring import mark_safe

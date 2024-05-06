@@ -1,5 +1,6 @@
 from django.contrib import admin
 from .models import CourseDirection, CourseCategory, Course, Teacher, CourseChapter, CourseLesson
+from .models import Activity, DiscountType, Discount, CourseActivityPrice
 
 
 class CourseCategoryInLine(admin.StackedInline):
@@ -72,7 +73,8 @@ admin.site.register(CourseCategory, CourseCategoryModelAdmin)
 
 class CourseModelAdmin(admin.ModelAdmin):
     """课程信息的模型管理器"""
-    list_display = ["id", "name", 'course_cover_small', "course_type", "level", "pub_date", "students", "lessons", "price"]
+    list_display = ["id", "name", 'course_cover_small', "course_type", "level", "pub_date", "students", "lessons",
+                    "price"]
     # 分页配置，一夜数据量
     list_per_page = 10
 
@@ -94,7 +96,7 @@ admin.site.register(Teacher, TeacherModelAdmin)
 
 class CourseChapterModelAdmin(admin.ModelAdmin):
     """课程章节的模型管理器"""
-    list_display = ["id", "text", "pub_date",  ]
+    list_display = ["id", "text", "pub_date", ]
     # 分页配置，一夜数据量
     list_per_page = 10
 
@@ -110,3 +112,35 @@ class CourseLessonModelAdmin(admin.ModelAdmin):
 
 
 admin.site.register(CourseLesson, CourseLessonModelAdmin)
+
+
+class ActivityModelAdmin(admin.ModelAdmin):
+    """优惠活动的模型管理器"""
+    list_display = ["id", "name", "start_time", "end_time", "remark"]
+
+
+admin.site.register(Activity, ActivityModelAdmin)
+
+
+class DiscountTypeModelAdmin(admin.ModelAdmin):
+    """优惠类型的模型管理器"""
+    list_display = ["id", "name", "remark"]
+
+
+admin.site.register(DiscountType, DiscountTypeModelAdmin)
+
+
+class DiscountModelAdmin(admin.ModelAdmin):
+    """优惠公式的模型管理器"""
+    list_display = ["id", "name", "discount_type", "condition", "sale"]
+
+
+admin.site.register(Discount, DiscountModelAdmin)
+
+
+class CourseActivityPriceModelAdmin(admin.ModelAdmin):
+    """课程活动价格的模型管理器"""
+    list_display = ["id", "activity", "course", "discount"]
+
+
+admin.site.register(CourseActivityPrice, CourseActivityPriceModelAdmin)
