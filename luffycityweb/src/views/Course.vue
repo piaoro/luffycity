@@ -11,7 +11,8 @@
           </div>
           <div class="actual-header-search">
             <div class="search-inner">
-              <input class="actual-search-input" placeholder="搜索感兴趣的实战课程内容" v-model="course.text" type="text" autocomplete="off">
+              <input class="actual-search-input" placeholder="搜索感兴趣的实战课程内容" v-model="course.text" type="text"
+                     autocomplete="off">
               <img class="actual-search-button" src="../assets/search.svg" @click.prevent.stop="get_course_list"/>
             </div>
             <div class="actual-searchtags">
@@ -19,7 +20,7 @@
             <div class="search-hot">
               <span>热搜：</span>
               <a href="" @click.prevent.stop="search_by_hotword(hot_word)" v-for="hot_word in course.hot_word_list">
-                  {{hot_word}}
+                {{ hot_word }}
               </a>
             </div>
           </div>
@@ -77,15 +78,19 @@
                   <i class="countdown"
                      v-if="course_info.discount.expire">{{ parseInt(course_info.discount.expire / 86400) }}
                   <span
-                      class="day">天</span>{{ fill0(parseInt(course_info.discount.expire / 3600 % 24)) }}:{{ fill0(parseInt(course_info.discount.expire / 60 % 60)) }}:{{ fill0(parseInt(course_info.discount.expire % 60)) }}</i>
+                      class="day">天</span>{{
+                      fill0(parseInt(course_info.discount.expire / 3600 % 24))
+                    }}:{{
+                      fill0(parseInt(course_info.discount.expire / 60 % 60))
+                    }}:{{ fill0(parseInt(course_info.discount.expire % 60)) }}</i>
                 </span>
               </p>
               <p class="two clearfix">
                 <span class="price l red bold"
-                      v-if="course_info.discount.price">￥{{ parseFloat(course_info.discount.price).toFixed(2) }}</span>
+                      v-if="course_info.discount.price>=0">￥{{ parseFloat(course_info.discount.price).toFixed(2) }}</span>
                 <span class="price l red bold" v-else>￥{{ parseFloat(course_info.price).toFixed(2) }}</span>
                 <span class="origin-price l delete-line"
-                      v-if="course_info.discount.price">￥{{ parseFloat(course_info.price).toFixed(2) }}</span>
+                      v-if="course_info.discount.price>=0">￥{{ parseFloat(course_info.price).toFixed(2) }}</span>
                 <span class="add-shop-cart r"><img class="icon imv2-shopping-cart" src="../assets/cart2.svg">加购物车</span>
               </p>
             </router-link>
@@ -112,7 +117,7 @@
 </template>
 
 <script setup>
-import {reactive, ref,watch} from "vue"
+import {reactive, ref, watch} from "vue"
 import Header from "../components/Header.vue"
 import Footer from "../components/Footer.vue"
 import course from "../api/course";
@@ -134,23 +139,23 @@ const get_category = () => {
 
 get_category();
 
-const get_hot_word = ()=>{
+const get_hot_word = () => {
   // 搜索热门关键字列表
-  course.get_hot_word().then(response =>{
+  course.get_hot_word().then(response => {
     course.hot_word_list = response.data
   })
 }
 
-const get_text = (text) =>{
+const get_text = (text) => {
   course.text = text
   get_course_list()
 }
 
 const get_course_list = (param) => {
   let ret = null
-  if(course.text){
+  if (course.text) {
     ret = course.search_course()
-  }else{
+  } else {
     ret = course.get_course_list(param)
   }
   // 获取课程列表
@@ -168,7 +173,7 @@ const get_course_list = (param) => {
 get_course_list(course.page);
 
 // 当热搜词被点击，进行搜索
-const search_by_hotword = (hot_word)=>{
+const search_by_hotword = (hot_word) => {
   course.text = hot_word
   get_course_list()
 }
@@ -178,7 +183,7 @@ watch(
     // 监听当前学习方向，在改变时，更新对应方向下的课程分类与课程信息
     () => course.current_direction,
     () => {
-      course.page=1;
+      course.page = 1;
       // 重置排序条件
       course.ordering = "-id";
       // 重置当前选中的课程分类
@@ -192,7 +197,7 @@ watch(
     // 监听切换不同的课程分类，在改变时，更新对应分类下的课程信息
     () => course.current_category,
     () => {
-      course.page=1;
+      course.page = 1;
       // 重置排序条件
       course.ordering = "-id";
       get_course_list(course.page);
@@ -202,7 +207,7 @@ watch(
     // 监听课程切换不同的排序条件
     () => course.ordering,
     () => {
-      course.page=1;
+      course.page = 1;
       get_course_list(course.page);
     }
 )
