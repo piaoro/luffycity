@@ -80,7 +80,6 @@ const course = reactive({
         }
     },
     tabIndex: 1,      // 课程详情页中默认展示的课程信息的选项卡
-    // 中间代码省略...
     // 获取课程详情
     get_course(){
         return http.get(`/course/${this.course_id}`)

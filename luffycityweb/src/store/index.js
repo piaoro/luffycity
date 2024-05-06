@@ -7,7 +7,8 @@ const store = createStore({
         return{
             user:{
 
-            }
+            },
+            cart_total: 0, // 购物车中的商品数量，默认为0
         }
     },
     getters:{
@@ -36,7 +37,11 @@ const store = createStore({
             state.user = {}
             localStorage.token = null;
             sessionStorage.token = null;
-        }
+        },
+        cart_total(state, total) {
+            // 设置商品数量的总数
+            state.cart_total = total
+        },
     }
 })
 

@@ -32,10 +32,11 @@ import {reactive, onBeforeUnmount, onMounted} from "vue";
 import user from "../api/user";
 import {ElMessage} from 'element-plus'
 import "../utils/TCaptcha.js"
-
-const emit = defineEmits(["successheader",])
 import {useStore} from 'vuex'
 import settings from "../settings";
+
+const emit = defineEmits(["successheader",])
+
 
 const store = useStore()
 
@@ -68,7 +69,7 @@ const loginhandler = () => {
     if (user.remember) {
       localStorage.token = resp.data.token;
     } else {
-      sessionStorage.tokem = resp.data.token;
+      sessionStorage.token = resp.data.token;
     }
     ElMessage.success("登陆成功");
     user.account = "";
@@ -97,7 +98,7 @@ const smsloginhandler = () =>{
     if (user.remember) {
       localStorage.token = resp.data.token;
     } else {
-      sessionStorage.tokem = resp.data.token;
+      sessionStorage.token = resp.data.token;
     }
     ElMessage.success("登陆成功");
     user.account = "";
@@ -108,6 +109,7 @@ const smsloginhandler = () =>{
     let playload = resp.data.token.split(".")[1]
     let playload_data = JSON.parse(atob(playload))
     store.commit('login', playload_data)
+    store.commit("cart_total", response.data.cart_total)
     emit("successheader");
   }).catch(error => {
     ElMessage.error(error?.response?.data?.non_field_errors[0]);

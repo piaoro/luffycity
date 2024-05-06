@@ -22,7 +22,9 @@
         <div class="wrap-right">
           <h3 class="course-name">{{ course.info.name }}</h3>
           <p class="data">
-            {{ course.info.students }}人在学&nbsp;&nbsp;&nbsp;&nbsp;课程总时长：{{ course.info.pub_lessons }}课时/{{ course.info.lessons }}课时&nbsp;&nbsp;&nbsp;&nbsp;难度：{{ course.info.get_level_display }}</p>
+            {{ course.info.students }}人在学&nbsp;&nbsp;&nbsp;&nbsp;课程总时长：{{
+              course.info.pub_lessons
+            }}课时/{{ course.info.lessons }}课时&nbsp;&nbsp;&nbsp;&nbsp;难度：{{ course.info.get_level_display }}</p>
           <div class="sale-time" v-if="course.info.discount.type">
             <p class="sale-type">{{ course.info.discount.type }}</p>
             <p class="expire" v-if="course.info.discount.expire>0">距离结束：仅剩
@@ -34,27 +36,34 @@
           <div class="sale-time" v-if="!course.info.discount.type">
             <p class="sale-type">课程价格 ¥{{ parseFloat(course.info.price).toFixed(2) }}</p>
           </div>
-           <p class="course-price" v-if="course.info.discount.price >= 0">
-              <span>活动价</span>
-              <span class="discount">¥{{parseFloat(course.info.discount.price).toFixed(2)}}</span>
-              <span class="original">¥{{parseFloat(course.info.price).toFixed(2)}}</span>
-            </p>
+          <p class="course-price" v-if="course.info.discount.price >= 0">
+            <span>活动价</span>
+            <span class="discount">¥{{ parseFloat(course.info.discount.price).toFixed(2) }}</span>
+            <span class="original">¥{{ parseFloat(course.info.price).toFixed(2) }}</span>
+          </p>
           <div class="buy">
             <div class="buy-btn">
               <button class="buy-now">立即购买</button>
               <button class="free">免费试学</button>
             </div>
-            <div class="add-cart"><img src="../assets/cart-yellow.svg" alt="">加入购物车</div>
+            <el-popconfirm title="您确认添加当前课程加入购物车吗？" @confirm="add_cart" confirmButtonText="买买买！"
+                           cancelButtonText="误操作！">
+              <template #reference>
+                <div class="add-cart"><img src="../assets/cart-yellow.svg" alt="">加入购物车</div>
+              </template>
+            </el-popconfirm>
+            <!--              <div class="add-cart"><img src="../assets/cart-yellow.svg" alt="">加入购物车</div>-->
           </div>
         </div>
       </div>
       <div class="course-tab">
         <ul class="tab-list">
-            <li :class="course.tabIndex===1?'active':''" @click="course.tabIndex=1">详情介绍</li>
-            <li :class="course.tabIndex===2?'active':''" @click="course.tabIndex=2">课程章节 <span :class="course.tabIndex!==2?'free':''" v-if="course.con_free_study">(试学)</span></li>
-            <li :class="course.tabIndex===3?'active':''" @click="course.tabIndex=3">用户评论 (42)</li>
-            <li :class="course.tabIndex===4?'active':''" @click="course.tabIndex=4">常见问题</li>
-          </ul>
+          <li :class="course.tabIndex===1?'active':''" @click="course.tabIndex=1">详情介绍</li>
+          <li :class="course.tabIndex===2?'active':''" @click="course.tabIndex=2">课程章节 <span
+              :class="course.tabIndex!==2?'free':''" v-if="course.con_free_study">(试学)</span></li>
+          <li :class="course.tabIndex===3?'active':''" @click="course.tabIndex=3">用户评论 (42)</li>
+          <li :class="course.tabIndex===4?'active':''" @click="course.tabIndex=4">常见问题</li>
+        </ul>
       </div>
       <div class="course-content">
         <div class="course-tab-list">
@@ -122,7 +131,10 @@ import {AliPlayerV3} from "vue-aliplayer-v3"
 import course from "../api/course"
 import {ElMessage} from 'element-plus'
 import {fill0} from "../utils/func";
+import {useStore} from "vuex";
 
+
+const store = useStore()
 let route = useRoute()
 let router = useRouter()
 let player = ref(null)
@@ -187,6 +199,22 @@ const onPause = (event) => {
 const onPlaying = (event) => {
   // console.log("播放中");
   // console.log(player.value.getCurrentTime());
+}
+
+// 添加商品到购物车
+let add_cart = ()=>{
+  let token = sessionStorage.token || localStorage.token
+  // 详情页中添加商品到购物车，不用传递参数，直接使用state.course来获取课程信息
+  cart.add_course_to_cart(course.course_id, token).then(response=>{
+    store.commit("cart_total", response.data.cart_total)
+    ElMessage.success(response.data.errmsg)
+  }).catch(error=>{
+    if(error.response.status === 401){
+      store.commit("logout");
+      ElMessage.error("您尚未登录或已登录超时，请登录后继续操作！");
+    }
+    ElMessage.error("添加商品到购物车失败！")
+  })
 }
 
 </script>

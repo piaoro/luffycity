@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'home',
     'users',
     'courses',
+    'cart'
 ]
 
 MIDDLEWARE = [
@@ -148,6 +149,14 @@ CACHES = {
     "hot_word": {
         "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": "redis://:@127.0.0.1:6379/3",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    },
+    # 提供存储购物车课程商品
+    "cart": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://:@127.0.0.1:6379/4",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
@@ -288,6 +297,8 @@ JWT_AUTH = {
     "JWT_EXPIRATION_DELTA": datetime.timedelta(days=1),
     # 自定义载荷
     'JWT_PAYLOAD_HANDLER': 'luffycityapi.utlis.authenticate.jwt_payload_handler',
+    # 自定义响应数据
+    'JWT_RESPONSE_PAYLOAD_HANDLER': 'luffycityapi.utlis.authenticate.jwt_response_payload_handler'
 }
 
 AUTH_USER_MODEL = "users.User"
