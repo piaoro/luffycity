@@ -143,7 +143,6 @@ class Course(BaseModel):
             if course_price >= condition_price:
                 # 计算本次课程参与了优惠以后的价格
                 sale = last_activity_log.discount.sale
-                print(f"{type_text}-{sale}")
                 if sale == "0":
                     # 免费，则最终价格为0
                     price = 0

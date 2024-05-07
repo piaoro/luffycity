@@ -12,7 +12,7 @@
           </div>
           <div class="right">
             <div class="">
-              <span class="left"><router-link class="myorder-history" to="/myorder">我的订单列表</router-link></span>
+              <span class="left"><router-link class="myorder-history" to="/order">我的订单列表</router-link></span>
             </div>
           </div>
         </div>
@@ -27,7 +27,7 @@
           <div class="item-4 l"><span>操作</span></div>
         </div>
         <div class="cart-body-table">
-          <div class="item" v-for="course_info in cart.course_list">
+          <div class="item" v-for="course_info,key in cart.course_list">
             <div class="item-1">
               <el-checkbox v-model="course_info.selected" @change="change_select_course(course_info)"></el-checkbox>
             </div>
@@ -76,7 +76,7 @@
                       </span>
                     </div>
                   </div>
-                  <div class="li-3"><span class="btn">去结算</span></div>
+                  <div class="li-3"><router-link to="/order" class="btn">去结算</router-link></div>
                 </div>
               </div>
             </div>
@@ -95,10 +95,10 @@ import Header from "../components/Header.vue"
 import Footer from "../components/Footer.vue"
 import cart from "../api/cart"
 import {ElMessage} from 'element-plus'
+import {useStore} from "vuex";
 
-let state = reactive({
-  checked: false,
-})
+let store = useStore()
+
 const get_cart = () => {
   // 获取购物车中的商品列表
   let token = sessionStorage.token || localStorage.token;
