@@ -188,7 +188,6 @@ const search_by_hotword = (hot_word) => {
 const add_cart = (course_info)=>{
   // 从本地存储中获取jwt token
   let token = sessionStorage.token || localStorage.token;
-  console.log(token)
   cart.add_course_to_cart(course_info.id, token).then(response=>{
     store.commit("cart_total", response.data.cart_total)
     ElMessage.success(response.data.errmsg)

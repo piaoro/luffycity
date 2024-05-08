@@ -76,7 +76,9 @@
                       </span>
                     </div>
                   </div>
-                  <div class="li-3"><router-link to="/order" class="btn">去结算</router-link></div>
+                  <div class="li-3">
+                    <router-link to="/order" class="btn">去结算</router-link>
+                  </div>
                 </div>
               </div>
             </div>
@@ -96,6 +98,7 @@ import Footer from "../components/Footer.vue"
 import cart from "../api/cart"
 import {ElMessage} from 'element-plus'
 import {useStore} from "vuex";
+import router from "../router";
 
 let store = useStore()
 
@@ -103,9 +106,16 @@ const get_cart = () => {
   // 获取购物车中的商品列表
   let token = sessionStorage.token || localStorage.token;
   cart.get_course_from_cart(token).then(response => {
-    cart.course_list = response.data.cart;
-    // 获取购物车中的商品总价格
-    get_cart_total();
+    if (response?.data?.cart?.length === undefined) {
+      ElMessage.error("当前购物车中没有下单的商品！请重新重新选择购物车中要购买的商品~");
+      router.back();
+    } else {
+      cart.course_list = response.data.cart
+      store.commit("cart_total", cart.course_list.length);
+      // 获取购物车中的商品总价格
+      get_cart_total();
+    }
+
   })
   // 监听所有课程的勾选状态是否发生
   watch(
@@ -164,7 +174,7 @@ watch(
         })
 
         // 如果是因为购物车中所有课程的勾选状态都为true的情况下，是不需要发送全选的ajax请求
-      if (!(cart.selected_course_total === cart.course_list.length)) {
+        if (!(cart.selected_course_total === cart.course_list.length)) {
           cart.select_all_course(true, token);
         }
       }

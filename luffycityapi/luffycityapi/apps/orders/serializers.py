@@ -53,10 +53,10 @@ class OrderModelSerializer(serializers.ModelSerializer):
                 real_price = 0  # 本次订单的实付总价
 
                 for course in course_list:
-                    discount_price = float(course.discount.get("price",0))  # 获取课程原价
-                    discount_name = course.discount.get("type",0)
+                    discount_price = float(course.discount.get("price", 0))  # 获取课程原价
+                    discount_name = course.discount.get("type", 0)
                     detail_list.append(OrderDetail(
-                        order = order,
+                        order=order,
                         course=course,
                         name=course.name,
                         price=course.price,
@@ -79,13 +79,15 @@ class OrderModelSerializer(serializers.ModelSerializer):
                 # todo 支付链接地址[后面实现支付功能的时候，再做]
                 order.pay_link = ""
                 # 删除购物车中被勾选的商品，保留没有被勾选的商品信息
-                cart = {key:value for key,value in cart_hash.items() if value == b'0'}
+                cart = {key: value for key, value in cart_hash.items() if value == b'0'}
+
                 pipe = redis.pipeline()
                 pipe.multi()
                 # 删除原来的购物车
                 pipe.delete(f"cart_{user_id}")
-                # 重新把未勾选的商品记录到购物车中
-                pipe.hset(f"cart_{user_id}",cart)
+                if cart:
+                    # 重新把未勾选的商品记录到购物车中
+                    pipe.hmset(f"cart_{user_id}", cart)
                 pipe.execute()
                 return order
             except Exception as e:
@@ -95,4 +97,3 @@ class OrderModelSerializer(serializers.ModelSerializer):
                 transaction.savepoint_rollback(t1)
                 # 3. 抛出异常，通知视图返回错误提示
                 raise serializers.ValidationError(detail="订单创建失败")
-

@@ -76,6 +76,7 @@ import Login from "./Login.vue";
 import nav from "../api/nav.js";
 
 import {useStore} from 'vuex'
+import cart from "../api/cart";
 const text = ref(null)
 const store = useStore()
 const state = reactive({
