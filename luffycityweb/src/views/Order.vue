@@ -43,11 +43,11 @@
           <div class="coupon-title-box">
             <p class="coupon-title">
               使用优惠券/积分
-              <span v-if="state.use_coupon" @click="state.use_coupon=!state.use_coupon"><svg
+              <span v-if="order.use_coupon" @click="order.use_coupon=!order.use_coupon"><svg
                   xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" data-v-394d1fd8=""><path
                   fill="currentColor"
                   d="M831.872 340.864 512 652.672 192.128 340.864a30.592 30.592 0 0 0-42.752 0 29.12 29.12 0 0 0 0 41.6L489.664 714.24a32 32 0 0 0 44.672 0l340.288-331.712a29.12 29.12 0 0 0 0-41.728 30.592 30.592 0 0 0-42.752 0z"></path></svg></span>
-              <span v-else @click="state.use_coupon=!state.use_coupon"><svg xmlns="http://www.w3.org/2000/svg"
+              <span v-else @click="order.use_coupon=!order.use_coupon"><svg xmlns="http://www.w3.org/2000/svg"
                                                                             viewBox="0 0 1024 1024" data-v-394d1fd8=""><path
                   fill="currentColor"
                   d="m488.832 344.32-339.84 356.672a32 32 0 0 0 0 44.16l.384.384a29.44 29.44 0 0 0 42.688 0l320-335.872 319.872 335.872a29.44 29.44 0 0 0 42.688 0l.384-.384a32 32 0 0 0 0-44.16L535.168 344.32a32 32 0 0 0-46.336 0z"></path></svg></span>
@@ -55,125 +55,98 @@
             </p>
           </div>
           <transition name="el-zoom-in-top">
-            <div class="coupon-del-box" v-if="state.use_coupon">
+            <div class="coupon-del-box" v-if="order.use_coupon">
               <div class="coupon-switch-box">
-                <div class="switch-btn ticket" :class="{'checked': state.discount_type===0}"
-                     @click="state.discount_type=0">优惠券 (4)<em><i class="imv2-check"></i></em></div>
-                <div class="switch-btn code" :class="{'checked': state.discount_type===1}"
-                     @click="state.discount_type=1">积分<em><i class="imv2-check"></i></em></div>
+                <div class="switch-btn ticket" :class="{'checked': order.discount_type===0}"
+                     @click="order.discount_type=0">优惠券 ({{order.coupon_sum}})<em><i class="imv2-check"></i></em></div>
+                <div class="switch-btn code" :class="{'checked': order.discount_type===1}"
+                     @click="order.discount_type=1">积分<em><i class="imv2-check"></i></em></div>
               </div>
-              <div class="coupon-content ticket" v-if="state.discount_type===0">
-                <p class="no-coupons" v-if="state.coupon_list.length<1">暂无可用优惠券</p>
+              <div class="coupon-content ticket" v-if="order.discount_type===0">
+                <p class="no-coupons" v-if="order.coupon_list.length<1">暂无可用优惠券</p>
                 <div class="coupons-box" v-else>
                   <div class="content-box">
                     <ul class="nouse-box">
-                      <li class="l">
+                      <li class="l" :class="{select: order.select === key}"
+                          @click="order.select = (order.select === key?-1:key)"
+                          v-for="(coupon,key) in order.coupon_list" :key="key">
                         <div class="detail-box more-del-box">
                           <div class="price-box">
-                            <p class="coupon-price l"> ￥100 </p>
-                            <p class="use-inst l">满499可用</p>
+                            <p class="coupon-price l" v-if="coupon.discount === '1'"> ￥{{ Math.abs(coupon.sale) }} </p>
+                            <p class="coupon-price l" v-if="coupon.discount === '2'">
+                              {{ coupon.sale.replace("*0.", "") }}折 </p>
+                            <p class="use-inst l" v-if="coupon.condition>0">满{{ coupon.condition }}元可用</p>
+                            <p class="use-inst l" v-else>任意使用</p>
                           </div>
                           <div class="use-detail-box">
-                            <div class="use-ajust-box">适用于：全部实战课程</div>
-                            <div class="use-ajust-box">有效期：2021.06.01-2021.06.18</div>
-                          </div>
-                        </div>
-                      </li>
-                      <li class="l select">
-                        <div class="detail-box more-del-box">
-                          <div class="price-box">
-                            <p class="coupon-price l"> ￥248 </p>
-                            <p class="use-inst l">满999可用</p>
-                          </div>
-                          <div class="use-detail-box">
-                            <div class="use-ajust-box">适用于：全部实战课程</div>
-                            <div class="use-ajust-box">有效期：2021.06.01-2021.06.18</div>
-                          </div>
-                        </div>
-                      </li>
-                      <li class="l wait-use">
-                        <div class="detail-box more-del-box">
-                          <div class="price-box">
-                            <p class="coupon-price l"> ￥248 </p>
-                            <p class="use-inst l">满999可用</p>
-                          </div>
-                          <div class="use-detail-box">
-                            <div class="use-ajust-box">适用于：全部实战课程</div>
-                            <div class="use-ajust-box">有效期：2021.06.01-2021.06.18</div>
-                          </div>
-                        </div>
-                      </li>
-                      <li class="l wait-use">
-                        <div class="detail-box more-del-box">
-                          <div class="price-box">
-                            <p class="coupon-price l"> ￥248 </p>
-                            <p class="use-inst l">满999可用</p>
-                          </div>
-                          <div class="use-detail-box">
-                            <div class="use-ajust-box">适用于：全部实战课程</div>
-                            <div class="use-ajust-box">有效期：2021.06.01-2021.06.18</div>
+                            <div class="use-ajust-box">适用于：{{ coupon.name }}</div>
+                            <div class="use-ajust-box">
+                              有效期：{{
+                                coupon.start_time.split(" ")[0].replaceAll("-", ".")
+                              }}-{{ coupon.end_time.split(" ")[0].replaceAll("-", ".") }}
+                            </div>
                           </div>
                         </div>
                       </li>
                     </ul>
-                    <ul class="use-box">
-                      <li class="l useing">
-                        <div class="detail-box more-del-box">
-                          <div class="price-box">
-                            <p class="coupon-price l"> ￥100 </p>
-                            <p class="use-inst l">满499可用</p>
-                          </div>
-                          <div class="use-detail-box">
-                            <div class="use-ajust-box">适用于：全部实战课程</div>
-                            <div class="use-ajust-box">有效期：2021.06.01-2021.06.18</div>
-                          </div>
-                        </div>
-                      </li>
-                      <li class="l">
-                        <div class="detail-box more-del-box">
-                          <div class="price-box">
-                            <p class="coupon-price l"> ￥248 </p>
-                            <p class="use-inst l">满999可用</p>
-                          </div>
-                          <div class="use-detail-box">
-                            <div class="use-ajust-box">适用于：全部实战课程</div>
-                            <div class="use-ajust-box">有效期：2021.06.01-2021.06.18</div>
-                          </div>
-                        </div>
-                      </li>
-                    </ul>
-                    <ul class="overdue-box">
-                      <li class="l useing">
-                        <div class="detail-box more-del-box">
-                          <div class="price-box">
-                            <p class="coupon-price l"> ￥100 </p>
-                            <p class="use-inst l">满499可用</p>
-                          </div>
-                          <div class="use-detail-box">
-                            <div class="use-ajust-box">适用于：全部实战课程</div>
-                            <div class="use-ajust-box">有效期：2021.06.01-2021.06.18</div>
-                          </div>
-                        </div>
-                      </li>
-                      <li class="l">
-                        <div class="detail-box more-del-box">
-                          <div class="price-box">
-                            <p class="coupon-price l"> ￥248 </p>
-                            <p class="use-inst l">满999可用</p>
-                          </div>
-                          <div class="use-detail-box">
-                            <div class="use-ajust-box">适用于：全部实战课程</div>
-                            <div class="use-ajust-box">有效期：2021.06.01-2021.06.18</div>
-                          </div>
-                        </div>
-                      </li>
-                    </ul>
+                    <!--                    <ul class="use-box">-->
+                    <!--                      <li class="l useing">-->
+                    <!--                        <div class="detail-box more-del-box">-->
+                    <!--                          <div class="price-box">-->
+                    <!--                            <p class="coupon-price l"> ￥100 </p>-->
+                    <!--                            <p class="use-inst l">满499可用</p>-->
+                    <!--                          </div>-->
+                    <!--                          <div class="use-detail-box">-->
+                    <!--                            <div class="use-ajust-box">适用于：全部实战课程</div>-->
+                    <!--                            <div class="use-ajust-box">有效期：2021.06.01-2021.06.18</div>-->
+                    <!--                          </div>-->
+                    <!--                        </div>-->
+                    <!--                      </li>-->
+                    <!--                      <li class="l">-->
+                    <!--                        <div class="detail-box more-del-box">-->
+                    <!--                          <div class="price-box">-->
+                    <!--                            <p class="coupon-price l"> ￥248 </p>-->
+                    <!--                            <p class="use-inst l">满999可用</p>-->
+                    <!--                          </div>-->
+                    <!--                          <div class="use-detail-box">-->
+                    <!--                            <div class="use-ajust-box">适用于：全部实战课程</div>-->
+                    <!--                            <div class="use-ajust-box">有效期：2021.06.01-2021.06.18</div>-->
+                    <!--                          </div>-->
+                    <!--                        </div>-->
+                    <!--                      </li>-->
+                    <!--                    </ul>-->
+                    <!--                    <ul class="overdue-box">-->
+                    <!--                      <li class="l useing">-->
+                    <!--                        <div class="detail-box more-del-box">-->
+                    <!--                          <div class="price-box">-->
+                    <!--                            <p class="coupon-price l"> ￥100 </p>-->
+                    <!--                            <p class="use-inst l">满499可用</p>-->
+                    <!--                          </div>-->
+                    <!--                          <div class="use-detail-box">-->
+                    <!--                            <div class="use-ajust-box">适用于：全部实战课程</div>-->
+                    <!--                            <div class="use-ajust-box">有效期：2021.06.01-2021.06.18</div>-->
+                    <!--                          </div>-->
+                    <!--                        </div>-->
+                    <!--                      </li>-->
+                    <!--                      <li class="l">-->
+                    <!--                        <div class="detail-box more-del-box">-->
+                    <!--                          <div class="price-box">-->
+                    <!--                            <p class="coupon-price l"> ￥248 </p>-->
+                    <!--                            <p class="use-inst l">满999可用</p>-->
+                    <!--                          </div>-->
+                    <!--                          <div class="use-detail-box">-->
+                    <!--                            <div class="use-ajust-box">适用于：全部实战课程</div>-->
+                    <!--                            <div class="use-ajust-box">有效期：2021.06.01-2021.06.18</div>-->
+                    <!--                          </div>-->
+                    <!--                        </div>-->
+                    <!--                      </li>-->
+                    <!--                    </ul>-->
                   </div>
                 </div>
               </div>
               <div class="coupon-content code" v-else>
                 <div class="input-box">
-                  <el-input-number placeholder="10积分=1元" v-model="state.credit" :step="1" :min="0"
+                  <el-input-number placeholder="10积分=1元" v-model="order.credit" :step="1" :min="0"
                                    :max="1000"></el-input-number>
                   <a class="convert-btn">兑换</a>
                 </div>
@@ -203,20 +176,21 @@
                  alt="余额">
           </div>
         </div>
-        <div class="pay-box" :class="{fixed:state.fixed}">
+        <div class="pay-box" :class="{fixed:order.fixed}">
           <div class="row-bottom">
             <div class="row">
               <div class="goods-total-price-box">
-                <p class="r rw price-num"><em>￥</em><span>1811.00</span></p>
-                <p class="r price-text"><span>共<span>5</span>件商品，</span>商品总金额：</p>
+                <p class="r rw price-num"><em>￥</em><span>{{ cart.total_price.toFixed(2) }}</span></p>
+                <p class="r price-text"><span>共<span>{{ cart.select_course_list?.length }}</span>件商品，</span>商品总金额：</p>
               </div>
             </div>
             <div class="coupons-discount-box">
-              <p class="r rw price-num">-<em>￥</em><span>60.00</span></p>
+              <p class="r rw price-num">-<em>￥</em><span>{{ order.discount_price.toFixed(2) }}</span></p>
               <p class="r price-text">优惠券/积分抵扣：</p>
             </div>
             <div class="pay-price-box clearfix">
-              <p class="r rw price"><em>￥</em><span id="js-pay-price">1751.00</span></p>
+              <p class="r rw price"><em>￥</em><span
+                  id="js-pay-price">{{ (cart.total_price - order.discount_price).toFixed(2) }}</span></p>
               <p class="r price-text">应付：</p>
             </div>
             <span class="r btn btn-red submit-btn" @click="commit_order">提交订单</span>
@@ -247,53 +221,76 @@ import router from "../router";
 
 let store = useStore()
 
-let state = reactive({
-  course_list: [],     // 购物车中的商品课程列表
-  total_price: 0,      // 勾选商品的总价格
-  use_coupon: false,   // 用户是否使用优惠
-  discount_type: 0,    // 0表示优惠券，1表示积分
-  coupon_list: [1, 2, 3], // 用户拥有的可用优惠券列表
-  select: -1,          // 当前用户选中的优惠券
-  credit: 0,           // 当前用户选择抵扣的积分
-  fixed: true,         // 底部订单总价是否固定浮动
-  pay_type: 0,         // 支付方式
-})
 
 const get_select_course = () => {
   // 获取购物车中的勾选商品列表
   let token = sessionStorage.token || localStorage.token;
   cart.get_select_course(token).then(response => {
-    if(response?.data?.error){
+    if (response?.data?.error) {
       ElMessage.error("当前购物车中没有下单的商品！请重新重新选择购物车中要购买的商品~");
       router.back()
     }
     cart.select_course_list = response.data.cart
-
-  }).catch(error=>{
-    if(error?.response?.status===400){
+    get_cart_total()
+  }).catch(error => {
+    if (error?.response?.status === 400) {
       ElMessage.error("登录超时！请重新登录后再继续操作~");
     }
   })
 }
 get_select_course();
 
-const commit_order = ()=>{
+// 计算获取购物车中勾选商品课程的总价格
+const get_cart_total = () => {
+  let sum = 0;
+  let select_sum = 0;
+  cart.select_course_list.forEach((course, key) => {
+    // 判断当前商品是否有优惠价格
+    if (course.discount.price >= 0) {
+      sum += course.discount.price;
+    } else {
+      sum += course.price;
+    }
+    cart.total_price = sum; // 购物车中的商品总价格
+    order.discount_price = 0
+    order.select = -1
+    order.use_coupon = false
+  })
+}
+
+
+const commit_order = () => {
   // 生成订单
   let token = sessionStorage.token || localStorage.token;
-  order.create_order(token).then(response=>{
+  // 当用户选择了优惠券，则需要获取当前选择的优惠券发放记录的id
+  let user_coupon_id = -1
+  if(order.select !== -1){
+    user_coupon_id = order.coupon_list[order.select].user_coupon_id;
+  }
+  order.create_order(user_coupon_id,token).then(response => {
+    console.log(response.data.order_number)  // todo 订单号
+    console.log(response.data.pay_link)      // todo 支付链接
     // 成功提示
     ElMessage.success("下单成功！马上跳转到支付页面，请稍候~")
     // 扣除掉被下单的商品数量，更新购物车中的商品数量
-    console.log(cart.select_course_list.length)
-    store.commit("cart_total",store.state.cart_total - cart.select_course_list.length)
-    console.log(store.state.cart_total)
-    router.go("Course")
-  }).catch(error=>{
-    if(error?.reponse?.status === 400){
+    store.commit("cart_total", store.state.cart_total - cart.select_course_list.length);
+
+  }).catch(error => {
+    if (error?.reponse?.status === 400) {
       ElMessage.success("登录超时！请重新登录后再继续操作~")
     }
   })
 }
+
+// 获取本次下单的可用优惠券
+const get_enable_coupon_list = () => {
+  let token = sessionStorage.token || localStorage.token;
+  order.get_enable_coupon_list(token).then(response => {
+    order.coupon_list = response.data
+    order.coupon_sum = order.coupon_list.length
+  })
+}
+get_enable_coupon_list();
 
 // 监听用户选择的支付方式
 watch(
@@ -303,12 +300,73 @@ watch(
     }
 )
 
+watch(
+    () => order.select,
+    () => {
+      order.discount_price = 0;
+      // 如果没有选择任何的优惠券，则select 为-1，那么不用进行计算优惠券折扣的价格了
+      if (order.select === -1) {
+        return // 阻止代码继续往下执行
+      }
+
+      // 根据下标select，获取当前选中的优惠券信息
+      let current_coupon = order.coupon_list[order.select]
+      // 针对折扣优惠券，找到最大优惠的课程
+      let max_discount = -1;
+      for (let course of cart.select_course_list) {
+        // 循环本次下单的勾选商品
+        if (current_coupon.enable_course === "__all__") {
+          // 如果当前优惠券是通用优惠券
+          if (max_discount !== -1) {
+            if (course.price > max_discount.price) {
+
+              // 在每次循环中，那当前循环的课程的价格与之前循环中得到的最大优惠课程的价格进行比较
+              max_discount = course
+            }
+          } else {
+            max_discount = course
+          }
+        } else if ((current_coupon.enable_course.indexOf(course.id) > -1) && (course.price >= parseFloat(current_coupon.condition))) {
+          // 判断 当前优惠券如果包含了当前课程， 并 课程的价格 > 当前优惠券的使用门槛
+          // 只允许没有参与其他优惠券活动的课程使用优惠券，基本所有的平台都不存在折上折的。
+          if (course.discount.price === undefined) {
+            if (max_discount !== -1) {
+              if (course.price > max_discount.price) {
+                max_discount = course
+              }
+            } else {
+              max_discount = course
+            }
+          }
+        }
+      }
+      if (max_discount !== -1) {
+        if (current_coupon.discount === '1') {
+          // 抵扣优惠券[抵扣的价格就是当前优惠券的价格]
+          order.discount_price = parseFloat(Math.abs(current_coupon.sale))
+        } else if (current_coupon.discount === '2') {
+          // 折扣优惠券]抵扣的价格就是(1-折扣百分比) * 课程原价]
+          order.discount_price = parseFloat(max_discount.price * (1 - parseFloat(current_coupon.sale.replace("*", ""))))
+        }
+        if(cart.total_price < order.discount_price){
+          order.select = -1
+          order.discount_price = 0
+          ElMessage.error("优惠劵价格大于当前课程商品，无法使用当前优惠券！")
+        }
+      } else {
+        order.select = -1
+        order.discount_price = 0
+        ElMessage.error("当前课程商品已经参与了其他优惠活动，无法再次使用当前优惠券！")
+      }
+    }
+)
+
 // 底部订单总价信息固定浮动效果
 window.onscroll = () => {
   let cart_body_table = document.querySelector(".cart-body-table")
   let offsetY = window.scrollY
   let maxY = cart_body_table.offsetTop + cart_body_table.offsetHeight
-  state.fixed = offsetY < maxY
+  order.fixed = offsetY < maxY
 }
 </script>
 
