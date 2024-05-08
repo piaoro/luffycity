@@ -48,7 +48,8 @@ INSTALLED_APPS = [
     'users',
     'courses',
     'cart',
-    'orders'
+    'orders',
+    'coupon',
 ]
 
 MIDDLEWARE = [
@@ -158,6 +159,13 @@ CACHES = {
     "cart": {
         "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": "redis://:@127.0.0.1:6379/4",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    },
+    "coupon": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://:@127.0.0.1:6379/5",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
@@ -343,7 +351,7 @@ CELERYD_TIME_LIMIT = 10 * 60
 CELERY_DISABLE_RATE_LIMITS = True
 # celery的任务结果内容格式
 CELERY_ACCEPT_CONTENT = ['json', 'pickle']
-# 之前定时任务（定时一次调用），使用了apply_async({}, countdown=30);
+# 之前定时任务（定时一次调用），使用了appfy_async({}, countdown=30);
 # 设置定时任务（定时多次调用）的调用列表，需要单独运行SCHEDULE命令才能让celery执行定时任务：celery -A mycelery.main beat，当然worker还是要启动的
 # https://docs.celeryproject.org/en/stable/userguide/periodic-tasks.html
 # from celery.schedules import crontab
@@ -389,7 +397,7 @@ SIMPLEUI_HOME_QUICK = True
 # 服务器信息
 SIMPLEUI_HOME_INFO = False
 # 关闭simpleui内置的使用分析
-SIMPLEUI_ANALYSIS = False
+SIMPLEUI_ANAfySIS = False
 # 离线模式
 SIMPLEUI_STATIC_OFFLINE = True
 # 首页图标地址

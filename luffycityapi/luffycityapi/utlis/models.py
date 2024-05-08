@@ -11,3 +11,8 @@ class BaseModel(models.Model):
 
     class Meta:
         abstract = True
+
+    def __str__(self):
+        if self.name:
+            return self.name
+        return str(self)
