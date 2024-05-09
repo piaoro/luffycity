@@ -40,6 +40,10 @@
             <span>活动价</span>
             <span class="discount">¥{{ parseFloat(course.info.discount.price).toFixed(2) }}</span>
             <span class="original">¥{{ parseFloat(course.info.price).toFixed(2) }}</span>
+            <p class="course-price" v-if="course.info.credit>0">
+              <span>抵扣积分</span>
+              <span class="discount">{{course.info.credit}}</span>
+            </p>
           </p>
           <div class="buy">
             <div class="buy-btn">
