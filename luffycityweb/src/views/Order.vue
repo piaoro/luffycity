@@ -25,7 +25,7 @@
               <dl class="l has-package">
                 <dt>【{{ course_info.course_type }}】{{ course_info.name }}</dt>
                 <p class="package-item" v-if="course_info.discount.type">{{ course_info.discount.type }}</p>
-                 <p class="package-item" v-if="course_info.credit>0">{{course_info.credit}}积分抵扣</p>
+                <p class="package-item" v-if="course_info.credit>0">{{ course_info.credit }}积分抵扣</p>
               </dl>
             </div>
             <div class="item-3">
@@ -59,7 +59,8 @@
             <div class="coupon-del-box" v-if="order.use_coupon">
               <div class="coupon-switch-box">
                 <div class="switch-btn ticket" :class="{'checked': order.discount_type===0}"
-                     @click="order.discount_type=0">优惠券 ({{order.coupon_sum}})<em><i class="imv2-check"></i></em></div>
+                     @click="order.discount_type=0">优惠券 ({{ order.coupon_sum }})<em><i class="imv2-check"></i></em>
+                </div>
                 <div class="switch-btn code" :class="{'checked': order.discount_type===1}"
                      @click="order.discount_type=1">积分<em><i class="imv2-check"></i></em></div>
               </div>
@@ -152,16 +153,19 @@
                   <a class="convert-btn" @click="conver_credit">兑换</a>
                   <a class="convert-btn" @click="max_conver_credit">最大积分兑换</a>
                 </div>
-                 <div v-else>
+                <div v-else>
                   <p class="error-msg">本次订单已有优惠，暂无可用积分</p>
                 </div>
                 <div class="converted-box">
-                   <p class="course-title" v-for="course in order.credit_course_list">
-                    课程:<span class="c_name">{{course.name}}</span>
-                    <span class="discount-cash">{{course.credit}}积分抵扣：<em>{{ (course.credit/order.credit_to_money).toFixed(2) }}</em>元</span>
+                  <p class="course-title" v-for="course in order.credit_course_list">
+                    课程:<span class="c_name">{{ course.name }}</span>
+                    <span class="discount-cash">{{ course.credit }}积分抵扣：<em>{{
+                        (course.credit / order.credit_to_money).toFixed(2)
+                      }}</em>元</span>
                   </p>
                 </div>
-                <p class="error-msg">本次订单最多可以使用{{order.max_use_credit}}积分，您当前拥有{{order.has_credit}}积分。({{order.credit_to_money}}积分=1元)</p>
+                <p class="error-msg">
+                  本次订单最多可以使用{{ order.max_use_credit }}积分，您当前拥有{{ order.has_credit }}积分。({{ order.credit_to_money }}积分=1元)</p>
                 <p class="tip">说明：每笔订单只能使用一次积分，并只有在部分允许使用积分兑换的课程中才能使用。</p>
               </div>
             </div>
@@ -207,6 +211,13 @@
         </div>
       </div>
     </div>
+    <div class="loadding" v-if="order.loading" @click="check_order">
+      <div class="box">
+        <p class="time">{{ fill0(parseInt(order.timeout / 60)) }}:{{ fill0(order.timeout % 60) }}</p>
+        <i class="el-icon-loading"></i><br>
+        <p>支付完成！点击关闭当前页面</p>
+      </div>
+    </div
     <Footer/>
   </div>
 </template>
@@ -219,10 +230,11 @@ import {useStore} from "vuex";
 import cart from "../api/cart";
 import order from "../api/order";
 import {ElMessage} from "element-plus";
-import router from "../router";
+import {useRouter} from "vue-router";
+import {fill0} from "../utils/func";
 
 let store = useStore()
-
+let router = useRouter()
 
 const get_select_course = () => {
   // 获取购物车中的勾选商品列表
@@ -233,16 +245,16 @@ const get_select_course = () => {
       router.back()
     }
     cart.select_course_list = response.data.cart
-    let  sum = 0 // 计算本次下单的总价格
-    let credit_course_list= [] // 可使用积分抵扣的课程列表
+    let sum = 0 // 计算本次下单的总价格
+    let credit_course_list = [] // 可使用积分抵扣的课程列表
     let max_use_credit = 0     // 本次下单最多可以用于抵扣的积分
-    response.data.cart?.forEach((course,key)=>{
-      if(course.discount.price >0 || course.discount.price === 0){
+    response.data.cart?.forEach((course, key) => {
+      if (course.discount.price > 0 || course.discount.price === 0) {
         sum += course.discount.price
-      }else {
+      } else {
         sum += course.price
       }
-      if (course.credit >0){
+      if (course.credit > 0) {
         max_use_credit = max_use_credit + course.credit
         credit_course_list.push(course)
       }
@@ -253,7 +265,7 @@ const get_select_course = () => {
     order.max_use_credit = max_use_credit; // 本次下单最多可以用于抵扣的积分
     // 本次订单最多可以使用的积分数量
     // 如果用户积分不足，则最多只能用完自己的积分
-    if(order.max_use_credit > order.has_credit){
+    if (order.max_use_credit > order.has_credit) {
       order.max_use_credit = order.has_credit
     }
   }).catch(error => {
@@ -288,16 +300,41 @@ const commit_order = () => {
   let token = sessionStorage.token || localStorage.token;
   // 当用户选择了优惠券，则需要获取当前选择的优惠券发放记录的id
   let user_coupon_id = -1
-  if(order.select !== -1){
+  if (order.select !== -1) {
     user_coupon_id = order.coupon_list[order.select].user_coupon_id;
   }
-  order.create_order(user_coupon_id,token).then(response => {
-    console.log(response.data.order_number)  // todo 订单号
-    console.log(response.data.pay_link)      // todo 支付链接
-    // 成功提示
+  order.create_order(user_coupon_id, token).then(response => {
+     // 成功提示
     ElMessage.success("下单成功！马上跳转到支付页面，请稍候~")
     // 扣除掉被下单的商品数量，更新购物车中的商品数量
     store.commit("cart_total", store.state.cart_total - cart.select_course_list.length);
+    // 订单生成以后，先扣除临时用户积分
+    order.has_credit = order.has_credit - order.credit
+    // 根据订单号到服务端获取支付链接，并打开支付页面。
+    order.alipay_page_pay(response.data.order_number).then(response => {
+      window.open(response.data.link, "_blank");
+    })
+    // 支付倒计时提示
+    order.order_number = response.data.order_number  // 订单号
+    order.loading = true                             // 显示遮罩层
+    order.timeout = response.data.order_timeout      // 订单超时的时间，为15分钟
+    clearInterval(order.timer)  // 先清除原有定时器，保证整个页面中timer对应的定时器是唯一的。
+    order.timer = setInterval(() => {
+        if(order.timeout > 1){
+            order.timeout=order.timeout - 1;
+        }else{
+            ElMessage.error("订单超时！如果您已经支付成功！请点击关闭当前弹窗！当前页面15秒后关闭！");
+            clearInterval(order.timer);
+            // 发送一个订单查询
+            check_order();
+            // 关闭页面
+            setTimeout(()=>{
+                // 跳转到用户的订单用心
+                router.push("/user/order");
+            }, 1500);
+        }
+      }, 3000);
+
 
   }).catch(error => {
     if (error?.reponse?.status === 400) {
@@ -311,7 +348,7 @@ const get_enable_coupon_list = () => {
   let token = sessionStorage.token || localStorage.token;
   order.get_enable_coupon_list(token).then(response => {
     order.coupon_list = response.data.coupon_list
-    order.credit_to_money =  response.data.credit_to_money
+    order.credit_to_money = response.data.credit_to_money
     order.has_credit = response.data.has_credit
     order.coupon_sum = order.coupon_list.length
   })
@@ -319,14 +356,26 @@ const get_enable_coupon_list = () => {
 get_enable_coupon_list();
 
 // 积分兑换抵扣
-const conver_credit = ()=>{
+const conver_credit = () => {
   order.discount_price = parseFloat((order.credit / order.credit_to_money).toFixed(2))
 }
 
 // 本次下单的最大兑换积分
-const max_conver_credit = ()=>{
+const max_conver_credit = () => {
   order.credit = order.max_use_credit
   conver_credit()
+}
+
+// 查询订单状态
+const check_order = ()=>{
+  let token = sessionStorage.token || localStorage.token;
+  order.query_order(token).then(response=>{
+    order.loading = false;
+    router.push("/");
+  }).catch(error=>{
+    console.log(error);
+    ElMessage.error(error.response.data.errmsg);
+  })
 }
 
 // 监听用户选择的支付方式
@@ -385,7 +434,7 @@ watch(
           // 折扣优惠券]抵扣的价格就是(1-折扣百分比) * 课程原价]
           order.discount_price = parseFloat(max_discount.price * (1 - parseFloat(current_coupon.sale.replace("*", ""))))
         }
-        if(cart.total_price < order.discount_price){
+        if (cart.total_price < order.discount_price) {
           order.select = -1
           order.discount_price = 0
           ElMessage.error("优惠劵价格大于当前课程商品，无法使用当前优惠券！")
@@ -400,8 +449,8 @@ watch(
 
 // 在切换不同的优惠类型，重置积分和优惠券信息
 watch(
-    ()=>order.discount_type,
-    ()=>{
+    () => order.discount_type,
+    () => {
       order.select = -1
       order.credit = 0
       order.discount_price = 0
@@ -1536,5 +1585,34 @@ body {
 
 .pay-type .list img {
   margin-right: 10px;
+}
+.loadding{
+  width: 100%;
+  height: 100%;
+  margin: auto;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999;
+  background-color: rgba(0,0,0,.7);
+}
+.box{
+  width: 300px;
+  height: 150px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
+  font-size: 40px;
+  text-align: center;
+  padding-top: 50px;
+  color: #fff;
+}
+.box .time{
+  font-size: 22px;
 }
 </style>

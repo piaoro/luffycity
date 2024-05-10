@@ -195,6 +195,8 @@ const add_cart = (course_info)=>{
     if(error.response.status === 401){
       store.commit("logout");
       ElMessage.error("您尚未登录或已登录超时，请登录后继续操作！");
+    }else if(error.response.status === 400){
+      ElMessage.error(error.response.data.errmsg);
     }else{
       ElMessage.error("添加商品到购物车失败！");
     }

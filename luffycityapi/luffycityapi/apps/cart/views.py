@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django_redis import get_redis_connection
 from courses.models import Course
+from users.models import UserCourse
 
 
 # Create your views here.
@@ -20,10 +21,17 @@ class CartAPIView(APIView):
         # 2. 验证课程是否允许购买[is_show=True, is_delete=False]
         try:
             # 判断课程是否存在
-            # todo 判断用户是否已经购买了
             course = Course.objects.get(is_show=True, is_delete=False, pk=course_id)
         except:
             return Response({"errmsg": "当前课程不存在！"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # 判断用户是否已经购买了
+            outercourse = UserCourse.objects.get(user_id=user_id,course_id=course_id)
+            if outercourse:
+                return Response({"errmsg": "对不起，您已经购买过当前课程！不需要重新购买了."}, status=status.HTTP_400_BAD_REQUEST)
+        except:
+            pass
 
         # 3. 添加商品到购物车
         redis = get_redis_connection("cart")
